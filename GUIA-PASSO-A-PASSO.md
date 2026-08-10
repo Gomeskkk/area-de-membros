@@ -28,6 +28,7 @@
 3. Clique em **Create bucket**
 4. Faça upload de todos os seus PDFs ali dentro
 5. Clique em cada arquivo → **Copy URL** — esse é o link que você vai colar no painel admin depois
+   
 
 ## PARTE 4 — Publicar o site no Vercel
 
