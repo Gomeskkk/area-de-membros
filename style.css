@@ -656,3 +656,22 @@ button:hover, .btn:hover{ background: #f08a1f; }
 .nav-menu-item:last-child{ border-bottom:none; }
 .nav-menu-item:hover{ background: var(--surface-2); color: var(--accent); }
 .nav-menu-item.current{ color: var(--accent); }
+
+/* ============ TOAST DE CONFIRMAÇÃO ============ */
+.toast-salvo{
+  position: fixed;
+  bottom: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  transition: bottom 0.3s ease;
+  z-index: 100;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+.toast-salvo.show{ bottom: 30px; }

@@ -9,7 +9,7 @@
 <body>
   <div class="topbar">
     <div class="nav-menu-wrap">
-      <button class="nav-menu-trigger" onclick="toggleMenu()">Área de Membros ▾</button>
+      <button class="nav-menu-trigger" onclick="toggleMenu()">Simulador de Perfil ▾</button>
       <div class="nav-menu-dropdown" id="nav-dropdown">
         <a class="nav-menu-item" href="membros.html">Área de Membros</a>
         <a class="nav-menu-item current" href="simulador.html">Simulador de Perfil</a>
@@ -22,8 +22,11 @@
     <a class="aula-back" href="membros.html">← Voltar aos módulos</a>
     <div class="aula-eyebrow">Ferramenta</div>
     <h1 class="aula-titulo" style="font-size:22px;">Simulador de Perfil</h1>
-    <p style="color:var(--muted); font-size:13px; margin-bottom:24px;">
+    <p style="color:var(--muted); font-size:13px; margin-bottom:12px;">
       Monte e visualize seu perfil antes de publicar de verdade no Instagram.
+    </p>
+    <p style="color:var(--accent); font-size:12px; margin-bottom:24px; font-family:'JetBrains Mono',monospace;">
+      → Toque em "Editar perfil" abaixo pra preencher seus dados. Suas alterações são salvas automaticamente ao clicar em "Concluído".
     </p>
 
     <!-- VISUALIZAÇÃO DO PERFIL (tela principal) -->
@@ -67,6 +70,8 @@
 
       <div class="ig-grid" id="ig-grid"></div>
     </div>
+
+    <div id="toast-salvo" class="toast-salvo">✓ Perfil salvo neste navegador</div>
 
     <!-- TELA DE EDIÇÃO (some por padrão, igual ao Instagram) -->
     <div class="ig-preview ig-edit-screen" id="tela-edicao" style="display:none;">
@@ -207,6 +212,13 @@
       try{ localStorage.setItem('simulador-perfil', JSON.stringify(dados)); } catch(e){ console.error(e); }
 
       fecharEdicao();
+      mostrarToast();
+    }
+
+    function mostrarToast(){
+      const toast = document.getElementById('toast-salvo');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
     }
 
     function carregarSalvo(){
