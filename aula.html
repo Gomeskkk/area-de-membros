@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Aula</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://drlmrqgqauzbrderovik.supabase.co">
 <link rel="stylesheet" href="style.css">
 </head>
 <body oncontextmenu="return false;">
@@ -22,6 +23,10 @@
         <div id="pdf-status" style="padding:40px; text-align:center; color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:12px;">Carregando documento...</div>
         <div id="pdf-pages"></div>
       </div>
+    </div>
+
+    <div class="aula-marcar-wrap">
+      <button id="btn-concluir" class="btn-concluir" onclick="alternarConcluida()">✓ Marcar como concluída</button>
     </div>
 
     <div class="aula-nav">
@@ -83,8 +88,9 @@
     }
 
     async function checarAcesso(){
-      const { data: { user } } = await supabaseClient.auth.getUser();
-      if(!user){ window.location.href = 'login.html'; return null; }
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if(!session){ window.location.href = 'login.html'; return null; }
+      const user = session.user;
       const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
       if(!profile || (!profile.approved && !profile.is_admin)){
         window.location.href = 'pendente.html'; return null;
