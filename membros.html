@@ -58,11 +58,11 @@
           </div>
           <div class="module-body" id="mod-${i}">
             ${seusPdfs.length === 0
-              ? '<p style="color:var(--muted); font-size:13px;">Nenhum PDF neste módulo ainda.</p>'
+              ? '<p style="color:var(--muted); font-size:13px;">Nenhuma aula neste módulo ainda.</p>'
               : seusPdfs.map(p => `
-                <div class="pdf-item">
-                  <span>${p.titulo}</span>
-                  <a href="${p.url}" target="_blank">Abrir PDF →</a>
+                <div class="aula-item" onclick="window.location.href='aula.html?id=${p.id}'">
+                  <span class="aula-item-titulo">${p.titulo}</span>
+                  <span class="aula-item-arrow">Acessar →</span>
                 </div>`).join('')}
           </div>
         </div>`;

@@ -234,3 +234,104 @@ button:hover, .btn:hover{ background: #f08a1f; }
 .inline-form{ display:flex; gap:8px; margin-top: 14px; }
 .inline-form input{ flex:1; }
 .inline-form button{ width:auto; margin-top:0; white-space:nowrap; }
+
+/* ============ VISUALIZADOR DE AULA (PREMIUM) ============ */
+.aula-wrap{
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 50px 24px 80px 24px;
+}
+.aula-back{
+  font-family:'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  display:inline-block;
+  margin-bottom: 24px;
+}
+.aula-back:hover{ color: var(--accent); }
+
+.aula-eyebrow{
+  font-family:'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.aula-titulo{
+  font-family:'Oswald', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 30px;
+  margin-bottom: 30px;
+}
+
+.pdf-vault{
+  position: relative;
+  border-radius: 6px;
+  padding: 3px;
+  background: linear-gradient(145deg, rgba(217,119,6,0.55), rgba(217,119,6,0.05) 40%, rgba(217,119,6,0.35));
+  box-shadow: 0 0 40px rgba(217,119,6,0.25), 0 0 90px rgba(217,119,6,0.10);
+}
+.pdf-vault-inner{
+  background: #050505;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+.pdf-vault-inner iframe{
+  width: 100%;
+  height: 78vh;
+  border: none;
+  display: block;
+  background: #050505;
+}
+/* tarja para dificultar clique direto na barra de ferramentas nativa do navegador */
+.pdf-shield-top{
+  position:absolute;
+  top:0; left:0; right:0;
+  height: 34px;
+  background: #050505;
+  z-index: 2;
+}
+
+.aula-nav{
+  display:flex;
+  justify-content:space-between;
+  margin-top: 30px;
+}
+.aula-nav a{
+  font-family:'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration:none;
+  border: 1px solid var(--border);
+  padding: 10px 16px;
+  border-radius: 3px;
+}
+.aula-nav a:hover{ color: var(--accent); border-color: var(--accent); }
+
+/* ============ LISTA DE AULAS DENTRO DO MÓDULO ============ */
+.aula-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  cursor: pointer;
+}
+.aula-item:last-child{ border-bottom:none; }
+.aula-item:hover .aula-item-titulo{ color: var(--accent); }
+.aula-item-titulo{ transition: color 0.15s ease; }
+.aula-item-arrow{
+  font-family:'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}

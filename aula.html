@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Aula</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+</head>
+<body oncontextmenu="return false;">
+  <div class="topbar">
+    <div class="eyebrow">Planta Mestra</div>
+    <a class="logout" href="#" onclick="sair()">Sair</a>
+  </div>
+
+  <div class="aula-wrap">
+    <a class="aula-back" href="membros.html">← Voltar aos módulos</a>
+    <div class="aula-eyebrow" id="modulo-nome">Carregando...</div>
+    <h1 class="aula-titulo" id="aula-nome">—</h1>
+
+    <div class="pdf-vault">
+      <div class="pdf-vault-inner">
+        <div class="pdf-shield-top"></div>
+        <iframe id="pdf-frame" src=""></iframe>
+      </div>
+    </div>
+
+    <div class="aula-nav">
+      <a href="#" id="btn-anterior">← Aula anterior</a>
+      <a href="#" id="btn-proxima">Próxima aula →</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    // bloqueia atalhos comuns de salvar/imprimir/inspecionar
+    document.addEventListener('keydown', function(e){
+      if(
+        (e.ctrlKey && (e.key === 's' || e.key === 'S')) ||
+        (e.ctrlKey && (e.key === 'p' || e.key === 'P')) ||
+        (e.key === 'F12') ||
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i'))
+      ){
+        e.preventDefault();
+      }
+    });
+
+    function getParam(nome){
+      return new URLSearchParams(window.location.search).get(nome);
+    }
+
+    async function checarAcesso(){
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if(!user){ window.location.href = 'login.html'; return null; }
+      const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
+      if(!profile || (!profile.approved && !profile.is_admin)){
+        window.location.href = 'pendente.html'; return null;
+      }
+      return profile;
+    }
+
+    async function carregarAula(){
+      const profile = await checarAcesso();
+      if(!profile) return;
+
+      const aulaId = getParam('id');
+      if(!aulaId){ window.location.href = 'membros.html'; return; }
+
+      const { data: aula } = await supabaseClient.from('pdfs').select('*').eq('id', aulaId).single();
+      if(!aula){ window.location.href = 'membros.html'; return; }
+
+      const { data: modulo } = await supabaseClient.from('modules').select('*').eq('id', aula.module_id).single();
+
+      document.getElementById('modulo-nome').textContent = modulo ? modulo.titulo : '';
+      document.getElementById('aula-nome').textContent = aula.titulo;
+      // #toolbar=0&navpanes=0 esconde a barra de ferramentas nativa em navegadores que suportam
+      document.getElementById('pdf-frame').src = aula.url + '#toolbar=0&navpanes=0&scrollbar=0';
+
+      // monta navegação entre aulas do mesmo módulo
+      const { data: aulasDoModulo } = await supabaseClient
+        .from('pdfs').select('*').eq('module_id', aula.module_id).order('ordem', { ascending: true });
+
+      const idx = aulasDoModulo.findIndex(a => a.id === aula.id);
+      const anterior = aulasDoModulo[idx - 1];
+      const proxima = aulasDoModulo[idx + 1];
+
+      const btnAnt = document.getElementById('btn-anterior');
+      const btnProx = document.getElementById('btn-proxima');
+
+      if(anterior){ btnAnt.href = 'aula.html?id=' + anterior.id; }
+      else { btnAnt.style.visibility = 'hidden'; }
+
+      if(proxima){ btnProx.href = 'aula.html?id=' + proxima.id; }
+      else { btnProx.href = 'membros.html'; btnProx.textContent = 'Voltar aos módulos →'; }
+    }
+
+    async function sair(){
+      await supabaseClient.auth.signOut();
+      window.location.href = 'login.html';
+    }
+
+    carregarAula();
+  </script>
+</body>
+</html>

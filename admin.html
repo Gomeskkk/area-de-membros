@@ -34,14 +34,14 @@
     </div>
 
     <div class="admin-section">
-      <h3 style="margin-bottom:14px;">Adicionar PDF a um módulo</h3>
+      <h3 style="margin-bottom:14px;">Adicionar aula a um módulo</h3>
       <label class="mini-input">Módulo</label>
       <select id="select-modulo" style="width:100%; background:var(--bg); color:var(--text); border:1px solid var(--border); padding:12px; border-radius:3px;"></select>
-      <label class="mini-input">Título do PDF</label>
-      <input id="pdf-titulo" type="text" placeholder="Ex: Aula 1 - Introdução">
-      <label class="mini-input">Link do PDF</label>
-      <input id="pdf-url" type="text" placeholder="Cole aqui o link do arquivo (Supabase Storage ou outro)">
-      <button onclick="adicionarPdf()">Adicionar PDF</button>
+      <label class="mini-input">Título da aula</label>
+      <input id="pdf-titulo" type="text" placeholder="Ex: Missão 01 - Escolha onde construir">
+      <label class="mini-input">Link do PDF (Supabase Storage)</label>
+      <input id="pdf-url" type="text" placeholder="Cole aqui o link do arquivo">
+      <button onclick="adicionarPdf()">Adicionar aula</button>
       <div id="msg-pdf" class="msg"></div>
     </div>
 
@@ -135,7 +135,7 @@
       await supabaseClient.from('pdfs').insert({ module_id, titulo, url, ordem });
       document.getElementById('pdf-titulo').value = '';
       document.getElementById('pdf-url').value = '';
-      msg.textContent = 'PDF adicionado!'; msg.className='msg show ok';
+      msg.textContent = 'Aula adicionada!'; msg.className='msg show ok';
     }
 
     async function sair(){
