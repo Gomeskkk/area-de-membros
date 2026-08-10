@@ -675,3 +675,22 @@ button:hover, .btn:hover{ background: #f08a1f; }
   box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
 .toast-salvo.show{ bottom: 30px; }
+
+/* ============ CAMPO DE SENHA COM MOSTRAR/OCULTAR ============ */
+.senha-wrap{ position: relative; }
+.senha-wrap input{ padding-right: 44px; }
+.btn-mostrar-senha{
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  width: auto;
+  margin: 0;
+  padding: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  line-height: 1;
+}
+.btn-mostrar-senha:hover{ background: none; }

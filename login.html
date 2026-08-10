@@ -15,7 +15,10 @@
       <label>E-mail</label>
       <input id="email" type="email" placeholder="seu@email.com">
       <label>Senha</label>
-      <input id="senha" type="password" placeholder="Sua senha">
+      <div class="senha-wrap">
+        <input id="senha" type="password" placeholder="Sua senha">
+        <button type="button" class="btn-mostrar-senha" onclick="alternarSenha()" id="btn-olho">👁️</button>
+      </div>
       <button onclick="entrar()">Entrar</button>
       <div id="msg" class="msg"></div>
     </div>
@@ -25,6 +28,18 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script>
+    function alternarSenha(){
+      const campo = document.getElementById('senha');
+      const btn = document.getElementById('btn-olho');
+      if(campo.type === 'password'){
+        campo.type = 'text';
+        btn.textContent = '🙈';
+      } else {
+        campo.type = 'password';
+        btn.textContent = '👁️';
+      }
+    }
+
     async function entrar(){
       const email = document.getElementById('email').value.trim();
       const senha = document.getElementById('senha').value;
