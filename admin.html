@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Painel Master</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="eyebrow">Painel master</div>
+    <a class="logout" href="#" onclick="sair()">Sair</a>
+  </div>
+
+  <div class="modules" style="max-width:760px;">
+
+    <div class="admin-section">
+      <h3 style="margin-bottom:14px;">Usuários pendentes</h3>
+      <div id="pendentes"><p style="color:var(--muted); font-size:13px;">Carregando...</p></div>
+    </div>
+
+    <div class="admin-section">
+      <h3 style="margin-bottom:14px;">Usuários aprovados</h3>
+      <div id="aprovados"></div>
+    </div>
+
+    <div class="admin-section">
+      <h3 style="margin-bottom:14px;">Módulos</h3>
+      <div id="modulos-lista"></div>
+      <div class="inline-form">
+        <input id="novo-modulo" type="text" placeholder="Nome do novo módulo">
+        <button onclick="criarModulo()">Adicionar</button>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <h3 style="margin-bottom:14px;">Adicionar PDF a um módulo</h3>
+      <label class="mini-input">Módulo</label>
+      <select id="select-modulo" style="width:100%; background:var(--bg); color:var(--text); border:1px solid var(--border); padding:12px; border-radius:3px;"></select>
+      <label class="mini-input">Título do PDF</label>
+      <input id="pdf-titulo" type="text" placeholder="Ex: Aula 1 - Introdução">
+      <label class="mini-input">Link do PDF</label>
+      <input id="pdf-url" type="text" placeholder="Cole aqui o link do arquivo (Supabase Storage ou outro)">
+      <button onclick="adicionarPdf()">Adicionar PDF</button>
+      <div id="msg-pdf" class="msg"></div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    async function checarAdmin(){
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if(!user){ window.location.href = 'login.html'; return null; }
+      const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
+      if(!profile || !profile.is_admin){ window.location.href = 'membros.html'; return null; }
+      return profile;
+    }
+
+    async function carregarUsuarios(){
+      const { data: perfis } = await supabaseClient.from('profiles').select('*').order('nome');
+      const pendentes = (perfis||[]).filter(p => !p.approved && !p.is_admin);
+      const aprovados = (perfis||[]).filter(p => p.approved && !p.is_admin);
+
+      document.getElementById('pendentes').innerHTML = pendentes.length === 0
+        ? '<p style="color:var(--muted); font-size:13px;">Nenhum pedido pendente.</p>'
+        : pendentes.map(p => `
+          <div class="row">
+            <div>${p.nome} <span style="color:var(--muted); font-size:12px;">— ${p.email}</span></div>
+            <div class="actions">
+              <button onclick="aprovar('${p.id}')">Aprovar</button>
+              <button class="btn-ghost" onclick="recusar('${p.id}')">Recusar</button>
+            </div>
+          </div>`).join('');
+
+      document.getElementById('aprovados').innerHTML = aprovados.length === 0
+        ? '<p style="color:var(--muted); font-size:13px;">Nenhum usuário aprovado ainda.</p>'
+        : aprovados.map(p => `
+          <div class="row">
+            <div>${p.nome} <span style="color:var(--muted); font-size:12px;">— ${p.email}</span></div>
+            <span class="tag approved">Aprovado</span>
+          </div>`).join('');
+    }
+
+    async function aprovar(id){
+      await supabaseClient.from('profiles').update({ approved: true }).eq('id', id);
+      carregarUsuarios();
+    }
+    async function recusar(id){
+      await supabaseClient.from('profiles').delete().eq('id', id);
+      carregarUsuarios();
+    }
+
+    async function carregarModulos(){
+      const { data: modulos } = await supabaseClient.from('modules').select('*').order('ordem');
+      document.getElementById('modulos-lista').innerHTML = (modulos||[]).map(m => `
+        <div class="row">
+          <div>${m.titulo}</div>
+          <div class="actions"><button class="btn-ghost" onclick="excluirModulo('${m.id}')">Excluir</button></div>
+        </div>`).join('') || '<p style="color:var(--muted); font-size:13px;">Nenhum módulo criado.</p>';
+
+      document.getElementById('select-modulo').innerHTML = (modulos||[])
+        .map(m => `<option value="${m.id}">${m.titulo}</option>`).join('');
+    }
+
+    async function criarModulo(){
+      const titulo = document.getElementById('novo-modulo').value.trim();
+      if(!titulo) return;
+      const { data: modulos } = await supabaseClient.from('modules').select('ordem').order('ordem', {ascending:false}).limit(1);
+      const ordem = modulos && modulos.length ? modulos[0].ordem + 1 : 1;
+      await supabaseClient.from('modules').insert({ titulo, ordem });
+      document.getElementById('novo-modulo').value = '';
+      carregarModulos();
+    }
+
+    async function excluirModulo(id){
+      await supabaseClient.from('pdfs').delete().eq('module_id', id);
+      await supabaseClient.from('modules').delete().eq('id', id);
+      carregarModulos();
+    }
+
+    async function adicionarPdf(){
+      const module_id = document.getElementById('select-modulo').value;
+      const titulo = document.getElementById('pdf-titulo').value.trim();
+      const url = document.getElementById('pdf-url').value.trim();
+      const msg = document.getElementById('msg-pdf');
+
+      if(!module_id){ msg.textContent='Crie um módulo primeiro.'; msg.className='msg show error'; return; }
+      if(!titulo || !url){ msg.textContent='Preencha título e link.'; msg.className='msg show error'; return; }
+
+      const { data: pdfs } = await supabaseClient.from('pdfs').select('ordem').eq('module_id', module_id).order('ordem', {ascending:false}).limit(1);
+      const ordem = pdfs && pdfs.length ? pdfs[0].ordem + 1 : 1;
+
+      await supabaseClient.from('pdfs').insert({ module_id, titulo, url, ordem });
+      document.getElementById('pdf-titulo').value = '';
+      document.getElementById('pdf-url').value = '';
+      msg.textContent = 'PDF adicionado!'; msg.className='msg show ok';
+    }
+
+    async function sair(){
+      await supabaseClient.auth.signOut();
+      window.location.href = 'login.html';
+    }
+
+    (async () => {
+      const ok = await checarAdmin();
+      if(ok){ carregarUsuarios(); carregarModulos(); }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Entrar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrap">
+    <div class="eyebrow">Área de membros</div>
+    <h1>Entrar</h1>
+    <div class="divider"></div>
+    <div class="card">
+      <label>E-mail</label>
+      <input id="email" type="email" placeholder="seu@email.com">
+      <label>Senha</label>
+      <input id="senha" type="password" placeholder="Sua senha">
+      <button onclick="entrar()">Entrar</button>
+      <div id="msg" class="msg"></div>
+    </div>
+    <div class="foot-link">Ainda não tem acesso? <a href="cadastro.html">Solicitar acesso</a></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    async function entrar(){
+      const email = document.getElementById('email').value.trim();
+      const senha = document.getElementById('senha').value;
+      const msg = document.getElementById('msg');
+
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: email, password: senha
+      });
+
+      if(error){
+        showMsg('E-mail ou senha inválidos.', 'error');
+        return;
+      }
+
+      // verifica status do perfil
+      const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+
+      if(!profile){
+        showMsg('Perfil não encontrado. Contate o suporte.', 'error');
+        return;
+      }
+
+      if(profile.is_admin){
+        window.location.href = 'admin.html';
+      } else if(profile.approved){
+        window.location.href = 'membros.html';
+      } else {
+        window.location.href = 'pendente.html';
+      }
+    }
+
+    function showMsg(t,c){
+      const msg = document.getElementById('msg');
+      msg.textContent = t;
+      msg.className = 'msg show ' + c;
+    }
+  </script>
+</body>
+</html>

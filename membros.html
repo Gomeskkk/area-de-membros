@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Área de Membros</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="eyebrow">Área de membros</div>
+    <a class="logout" href="#" onclick="sair()">Sair</a>
+  </div>
+
+  <div class="modules" id="modules">
+    <p style="color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:13px;">Carregando módulos...</p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    async function checarAcesso(){
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if(!user){ window.location.href = 'login.html'; return null; }
+
+      const { data: profile } = await supabaseClient
+        .from('profiles').select('*').eq('id', user.id).single();
+
+      if(!profile || (!profile.approved && !profile.is_admin)){
+        window.location.href = 'pendente.html'; return null;
+      }
+      return profile;
+    }
+
+    async function carregarModulos(){
+      const profile = await checarAcesso();
+      if(!profile) return;
+
+      const { data: modulos } = await supabaseClient
+        .from('modules').select('*').order('ordem', { ascending: true });
+
+      const { data: pdfs } = await supabaseClient
+        .from('pdfs').select('*').order('ordem', { ascending: true });
+
+      const container = document.getElementById('modules');
+      if(!modulos || modulos.length === 0){
+        container.innerHTML = '<p style="color:var(--muted)">Nenhum módulo publicado ainda.</p>';
+        return;
+      }
+
+      container.innerHTML = modulos.map((m, i) => {
+        const seusPdfs = (pdfs||[]).filter(p => p.module_id === m.id);
+        return `
+        <div class="module">
+          <div class="module-head" onclick="toggle(${i})">
+            <div class="module-num">${String(i+1).padStart(2,'0')}</div>
+            <div class="module-title">${m.titulo}</div>
+          </div>
+          <div class="module-body" id="mod-${i}">
+            ${seusPdfs.length === 0
+              ? '<p style="color:var(--muted); font-size:13px;">Nenhum PDF neste módulo ainda.</p>'
+              : seusPdfs.map(p => `
+                <div class="pdf-item">
+                  <span>${p.titulo}</span>
+                  <a href="${p.url}" target="_blank">Abrir PDF →</a>
+                </div>`).join('')}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function toggle(i){
+      document.getElementById('mod-'+i).classList.toggle('open');
+    }
+
+    async function sair(){
+      await supabaseClient.auth.signOut();
+      window.location.href = 'login.html';
+    }
+
+    carregarModulos();
+  </script>
+</body>
+</html>

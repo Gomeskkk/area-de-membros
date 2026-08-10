@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Criar acesso</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrap">
+    <div class="eyebrow">Acesso restrito</div>
+    <h1>Solicitar entrada</h1>
+    <div class="divider"></div>
+    <div class="card">
+      <label>Nome</label>
+      <input id="nome" type="text" placeholder="Seu nome">
+      <label>E-mail</label>
+      <input id="email" type="email" placeholder="seu@email.com">
+      <label>Senha</label>
+      <input id="senha" type="password" placeholder="Crie uma senha">
+      <button onclick="cadastrar()">Solicitar acesso</button>
+      <div id="msg" class="msg"></div>
+    </div>
+    <div class="foot-link">Já tem acesso? <a href="login.html">Entrar</a></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    async function cadastrar(){
+      const nome = document.getElementById('nome').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const senha = document.getElementById('senha').value;
+      const msg = document.getElementById('msg');
+
+      if(!nome || !email || !senha){
+        showMsg('Preencha todos os campos.', 'error'); return;
+      }
+      if(senha.length < 6){
+        showMsg('A senha precisa ter no mínimo 6 caracteres.', 'error'); return;
+      }
+
+      const { data, error } = await supabaseClient.auth.signUp({
+        email: email,
+        password: senha,
+        options: { data: { nome: nome } }
+      });
+
+      if(error){
+        showMsg('Erro: ' + error.message, 'error');
+        return;
+      }
+
+      // cria o registro de perfil (pendente de aprovação)
+      if(data.user){
+        await supabaseClient.from('profiles').insert({
+          id: data.user.id,
+          nome: nome,
+          email: email,
+          approved: false,
+          is_admin: false
+        });
+      }
+
+      showMsg('Cadastro enviado! Assim que for aprovado, você poderá entrar.', 'ok');
+      document.getElementById('nome').value='';
+      document.getElementById('email').value='';
+      document.getElementById('senha').value='';
+    }
+
+    function showMsg(t,c){
+      const msg = document.getElementById('msg');
+      msg.textContent = t;
+      msg.className = 'msg show ' + c;
+    }
+  </script>
+</body>
+</html>
