@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Simulador de Perfil</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="eyebrow">Planta Mestra</div>
+    <a class="logout" href="#" onclick="sair()">Sair</a>
+  </div>
+
+  <div class="aula-wrap" style="max-width:1000px;">
+    <a class="aula-back" href="membros.html">← Voltar aos módulos</a>
+    <div class="aula-eyebrow">Ferramenta</div>
+    <h1 class="aula-titulo">Simulador de Perfil</h1>
+    <p style="color:var(--muted); font-size:14px; margin-bottom:30px; max-width:600px;">
+      Monte seu perfil aqui antes de sair postando de verdade. Veja como fica antes de arriscar no Instagram.
+    </p>
+
+    <div class="sim-grid">
+      <!-- FORMULÁRIO -->
+      <div class="card">
+        <label>Foto de perfil</label>
+        <input type="file" id="sim-foto" accept="image/*" onchange="lerFoto(event)">
+
+        <label>Nome de exibição</label>
+        <input type="text" id="sim-nome" placeholder="Ex: O Arquiteto" oninput="atualizar()">
+
+        <label>@usuário</label>
+        <input type="text" id="sim-usuario" placeholder="Ex: o.arquiteto.oficial" oninput="atualizar()">
+
+        <label>Bio</label>
+        <textarea id="sim-bio" rows="4" placeholder="Escreva sua bio aqui..." oninput="atualizar()" style="width:100%; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:12px 14px; border-radius:3px; font-family:'Inter',sans-serif; font-size:14px; resize:vertical;"></textarea>
+
+        <label>Nicho (só pra sua referência)</label>
+        <input type="text" id="sim-nicho" placeholder="Ex: Marketing digital, dark, motivacional...">
+
+        <div style="display:flex; gap:14px; margin-top:18px;">
+          <div style="flex:1;">
+            <label style="margin-top:0;">Publicações</label>
+            <input type="text" id="sim-posts" value="27" oninput="atualizar()">
+          </div>
+          <div style="flex:1;">
+            <label style="margin-top:0;">Seguidores</label>
+            <input type="text" id="sim-seguidores" value="1.204" oninput="atualizar()">
+          </div>
+          <div style="flex:1;">
+            <label style="margin-top:0;">Seguindo</label>
+            <input type="text" id="sim-seguindo" value="89" oninput="atualizar()">
+          </div>
+        </div>
+
+        <button onclick="salvar()" style="margin-top:24px;">Salvar simulação</button>
+        <div id="msg-sim" class="msg"></div>
+      </div>
+
+      <!-- PREVIEW ESTILO INSTAGRAM -->
+      <div class="ig-preview">
+        <div class="ig-topbar">
+          <span class="ig-lock">🔒</span>
+          <span class="ig-username" id="ig-usuario-top">usuario</span>
+          <span class="ig-menu">☰</span>
+        </div>
+
+        <div class="ig-header">
+          <div class="ig-avatar" id="ig-avatar">
+            <span id="ig-avatar-placeholder">📷</span>
+          </div>
+          <div class="ig-stats">
+            <div class="ig-stat"><b id="ig-posts">27</b><span>Publicações</span></div>
+            <div class="ig-stat"><b id="ig-seguidores">1.204</b><span>Seguidores</span></div>
+            <div class="ig-stat"><b id="ig-seguindo">89</b><span>Seguindo</span></div>
+          </div>
+        </div>
+
+        <div class="ig-name" id="ig-nome">Seu Nome</div>
+        <div class="ig-bio" id="ig-bio">Sua bio vai aparecer aqui...</div>
+
+        <div class="ig-buttons">
+          <button class="ig-btn-edit">Editar perfil</button>
+          <button class="ig-btn-edit">Compartilhar perfil</button>
+        </div>
+
+        <div class="ig-highlights">
+          <div class="ig-highlight"><div class="ig-highlight-circle">+</div><span>Novo</span></div>
+          <div class="ig-highlight"><div class="ig-highlight-circle"></div><span>Sobre</span></div>
+          <div class="ig-highlight"><div class="ig-highlight-circle"></div><span>Provas</span></div>
+        </div>
+
+        <div class="ig-tabs">
+          <div class="ig-tab active">▦</div>
+          <div class="ig-tab">▷</div>
+          <div class="ig-tab">👤</div>
+        </div>
+
+        <div class="ig-grid" id="ig-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    let fotoBase64 = null;
+
+    async function checarAcesso(){
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if(!user){ window.location.href = 'login.html'; return null; }
+      const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
+      if(!profile || (!profile.approved && !profile.is_admin)){
+        window.location.href = 'pendente.html'; return null;
+      }
+      return profile;
+    }
+
+    function lerFoto(event){
+      const file = event.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e){
+        fotoBase64 = e.target.result;
+        atualizar();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function atualizar(){
+      const nome = document.getElementById('sim-nome').value || 'Seu Nome';
+      const usuario = document.getElementById('sim-usuario').value || 'usuario';
+      const bio = document.getElementById('sim-bio').value || 'Sua bio vai aparecer aqui...';
+      const posts = document.getElementById('sim-posts').value || '0';
+      const seguidores = document.getElementById('sim-seguidores').value || '0';
+      const seguindo = document.getElementById('sim-seguindo').value || '0';
+
+      document.getElementById('ig-nome').textContent = nome;
+      document.getElementById('ig-usuario-top').textContent = usuario;
+      document.getElementById('ig-bio').textContent = bio;
+      document.getElementById('ig-posts').textContent = posts;
+      document.getElementById('ig-seguidores').textContent = seguidores;
+      document.getElementById('ig-seguindo').textContent = seguindo;
+
+      const avatar = document.getElementById('ig-avatar');
+      if(fotoBase64){
+        avatar.style.backgroundImage = `url(${fotoBase64})`;
+        avatar.style.backgroundSize = 'cover';
+        avatar.style.backgroundPosition = 'center';
+        document.getElementById('ig-avatar-placeholder').style.display = 'none';
+      }
+
+      // monta grid de posts fake (usa a mesma foto se tiver, senão placeholders)
+      const grid = document.getElementById('ig-grid');
+      const totalPosts = Math.min(parseInt(posts) || 9, 9);
+      grid.innerHTML = '';
+      for(let i = 0; i < Math.max(totalPosts, 6); i++){
+        const div = document.createElement('div');
+        div.className = 'ig-post';
+        if(fotoBase64){
+          div.style.backgroundImage = `url(${fotoBase64})`;
+          div.style.backgroundSize = 'cover';
+          div.style.backgroundPosition = 'center';
+        }
+        grid.appendChild(div);
+      }
+    }
+
+    function salvar(){
+      const dados = {
+        nome: document.getElementById('sim-nome').value,
+        usuario: document.getElementById('sim-usuario').value,
+        bio: document.getElementById('sim-bio').value,
+        nicho: document.getElementById('sim-nicho').value,
+        posts: document.getElementById('sim-posts').value,
+        seguidores: document.getElementById('sim-seguidores').value,
+        seguindo: document.getElementById('sim-seguindo').value,
+        foto: fotoBase64
+      };
+      try{
+        localStorage.setItem('simulador-perfil', JSON.stringify(dados));
+        const msg = document.getElementById('msg-sim');
+        msg.textContent = 'Simulação salva neste navegador!';
+        msg.className = 'msg show ok';
+      } catch(e){
+        console.error(e);
+      }
+    }
+
+    function carregarSalvo(){
+      try{
+        const salvo = localStorage.getItem('simulador-perfil');
+        if(!salvo) return;
+        const dados = JSON.parse(salvo);
+        document.getElementById('sim-nome').value = dados.nome || '';
+        document.getElementById('sim-usuario').value = dados.usuario || '';
+        document.getElementById('sim-bio').value = dados.bio || '';
+        document.getElementById('sim-nicho').value = dados.nicho || '';
+        document.getElementById('sim-posts').value = dados.posts || '27';
+        document.getElementById('sim-seguidores').value = dados.seguidores || '1.204';
+        document.getElementById('sim-seguindo').value = dados.seguindo || '89';
+        fotoBase64 = dados.foto || null;
+      } catch(e){ console.error(e); }
+    }
+
+    async function sair(){
+      await supabaseClient.auth.signOut();
+      window.location.href = 'login.html';
+    }
+
+    (async () => {
+      const ok = await checarAcesso();
+      if(ok){ carregarSalvo(); atualizar(); }
+    })();
+  </script>
+</body>
+</html>
