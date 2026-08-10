@@ -15,12 +15,12 @@
   <div class="modules" style="max-width:760px;">
 
     <div class="admin-section">
-      <h3 style="margin-bottom:14px;">Usuários pendentes</h3>
+      <h3 style="margin-bottom:14px;">Usuários pendentes <span id="count-pendentes" style="color:var(--accent); font-family:'JetBrains Mono',monospace; font-size:13px;"></span></h3>
       <div id="pendentes"><p style="color:var(--muted); font-size:13px;">Carregando...</p></div>
     </div>
 
     <div class="admin-section">
-      <h3 style="margin-bottom:14px;">Usuários aprovados</h3>
+      <h3 style="margin-bottom:14px;">Usuários aprovados <span id="count-aprovados" style="color:var(--accent); font-family:'JetBrains Mono',monospace; font-size:13px;"></span></h3>
       <div id="aprovados"></div>
     </div>
 
@@ -63,6 +63,9 @@
       const pendentes = (perfis||[]).filter(p => !p.approved && !p.is_admin);
       const aprovados = (perfis||[]).filter(p => p.approved && !p.is_admin);
 
+      document.getElementById('count-pendentes').textContent = pendentes.length > 0 ? `(${pendentes.length})` : '';
+      document.getElementById('count-aprovados').textContent = aprovados.length > 0 ? `(${aprovados.length})` : '';
+
       document.getElementById('pendentes').innerHTML = pendentes.length === 0
         ? '<p style="color:var(--muted); font-size:13px;">Nenhum pedido pendente.</p>'
         : pendentes.map(p => `
@@ -79,7 +82,10 @@
         : aprovados.map(p => `
           <div class="row">
             <div>${p.nome} <span style="color:var(--muted); font-size:12px;">— ${p.email}</span></div>
-            <span class="tag approved">Aprovado</span>
+            <div class="actions">
+              <span class="tag approved">Aprovado</span>
+              <button class="btn-ghost" onclick="excluirMembro('${p.id}', '${p.nome.replace(/'/g, "\\'")}')">Excluir</button>
+            </div>
           </div>`).join('');
     }
 
@@ -88,6 +94,13 @@
       carregarUsuarios();
     }
     async function recusar(id){
+      await supabaseClient.from('profiles').delete().eq('id', id);
+      carregarUsuarios();
+    }
+
+    async function excluirMembro(id, nome){
+      const confirmado = window.confirm('Tem certeza que quer excluir "' + nome + '"? Ele perderá o acesso imediatamente e precisará se cadastrar de novo.');
+      if(!confirmado) return;
       await supabaseClient.from('profiles').delete().eq('id', id);
       carregarUsuarios();
     }
