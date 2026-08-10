@@ -329,7 +329,7 @@ button:hover, .btn:hover{ background: #f08a1f; }
 
 /* ============ DASHBOARD ESTILO NETFLIX ============ */
 .dash-header{
-  padding: 40px 40px 10px 40px;
+  padding: 60px 40px 20px 40px;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -337,14 +337,14 @@ button:hover, .btn:hover{ background: #f08a1f; }
   font-family: 'Oswald', sans-serif;
   font-weight: 600;
   text-transform: uppercase;
-  font-size: 26px;
+  font-size: 32px;
   color: var(--text);
 }
 .dash-sub{
   font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
-  margin-top: 6px;
+  margin-top: 8px;
 }
 
 .modules-grid{
@@ -365,7 +365,7 @@ button:hover, .btn:hover{ background: #f08a1f; }
   display: block;
   transition: transform 0.18s ease;
   flex: 0 0 auto;
-  width: 150px;
+  width: 240px;
   scroll-snap-align: start;
 }
 .module-card:hover{ transform: translateY(-4px); }
@@ -412,5 +412,5 @@ button:hover, .btn:hover{ background: #f08a1f; }
 .module-card:hover .module-card-label{ color: var(--text); }
 
 @media (min-width: 700px){
-  .module-card{ width: 180px; }
+  .module-card{ width: 260px; }
 }
