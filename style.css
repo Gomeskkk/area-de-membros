@@ -416,14 +416,59 @@ button:hover, .btn:hover{ background: #f08a1f; }
 }
 
 /* ============ SIMULADOR DE PERFIL (ESTILO INSTAGRAM) ============ */
-.sim-grid{
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 30px;
+.ig-edit-topbar{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #efefef;
+  font-size: 15px;
+  font-weight: 600;
 }
-@media (min-width: 900px){
-  .sim-grid{ grid-template-columns: 380px 1fr; align-items: start; }
+.ig-edit-cancelar, .ig-edit-concluir{
+  background:none; border:none; width:auto; margin-top:0;
+  font-family: inherit; font-size: 14px; text-transform:none; letter-spacing:normal;
+  padding:0; cursor:pointer;
 }
+.ig-edit-cancelar{ color:#262626; font-weight:400; }
+.ig-edit-concluir{ color:#0095f6; font-weight:600; }
+
+.ig-edit-avatar-row{
+  display:flex;
+  align-items:center;
+  gap: 16px;
+  padding: 20px 16px;
+}
+.ig-trocar-foto{
+  color:#0095f6;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ig-edit-field{
+  padding: 10px 16px;
+}
+.ig-edit-field label{
+  color: #8e8e8e;
+  font-size: 12px;
+  font-family: -apple-system, sans-serif;
+  margin: 0 0 4px 0;
+  text-transform: none;
+  letter-spacing: normal;
+}
+.ig-edit-field input, .ig-edit-field textarea{
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #efefef;
+  padding: 6px 0;
+  font-size: 14px;
+  color: #262626;
+  font-family: -apple-system, sans-serif;
+  background: transparent;
+  resize: vertical;
+}
+.ig-edit-field input:focus, .ig-edit-field textarea:focus{ outline:none; border-color:#0095f6; }
 
 .ig-preview{
   background: #ffffff;
@@ -563,3 +608,51 @@ button:hover, .btn:hover{ background: #f08a1f; }
   background-size: cover;
   background-position: center;
 }
+
+/* ============ MENU DROPDOWN NO TOPBAR ============ */
+.nav-menu-wrap{ position: relative; }
+.nav-menu-trigger{
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: auto;
+  margin-top: 0;
+  display:flex;
+  align-items:center;
+  gap: 6px;
+}
+.nav-menu-trigger:hover{ background:none; }
+.nav-menu-dropdown{
+  display:none;
+  position:absolute;
+  top: 26px;
+  left: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  min-width: 200px;
+  overflow:hidden;
+  z-index: 10;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.nav-menu-dropdown.open{ display:block; }
+.nav-menu-item{
+  display:block;
+  padding: 12px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+}
+.nav-menu-item:last-child{ border-bottom:none; }
+.nav-menu-item:hover{ background: var(--surface-2); color: var(--accent); }
+.nav-menu-item.current{ color: var(--accent); }

@@ -8,95 +8,114 @@
 </head>
 <body>
   <div class="topbar">
-    <div class="eyebrow">Planta Mestra</div>
+    <div class="nav-menu-wrap">
+      <button class="nav-menu-trigger" onclick="toggleMenu()">Área de Membros ▾</button>
+      <div class="nav-menu-dropdown" id="nav-dropdown">
+        <a class="nav-menu-item" href="membros.html">Área de Membros</a>
+        <a class="nav-menu-item current" href="simulador.html">Simulador de Perfil</a>
+      </div>
+    </div>
     <a class="logout" href="#" onclick="sair()">Sair</a>
   </div>
 
-  <div class="aula-wrap" style="max-width:1000px;">
+  <div class="aula-wrap" style="max-width:460px;">
     <a class="aula-back" href="membros.html">← Voltar aos módulos</a>
     <div class="aula-eyebrow">Ferramenta</div>
-    <h1 class="aula-titulo">Simulador de Perfil</h1>
-    <p style="color:var(--muted); font-size:14px; margin-bottom:30px; max-width:600px;">
-      Monte seu perfil aqui antes de sair postando de verdade. Veja como fica antes de arriscar no Instagram.
+    <h1 class="aula-titulo" style="font-size:22px;">Simulador de Perfil</h1>
+    <p style="color:var(--muted); font-size:13px; margin-bottom:24px;">
+      Monte e visualize seu perfil antes de publicar de verdade no Instagram.
     </p>
 
-    <div class="sim-grid">
-      <!-- FORMULÁRIO -->
-      <div class="card">
-        <label>Foto de perfil</label>
-        <input type="file" id="sim-foto" accept="image/*" onchange="lerFoto(event)">
-
-        <label>Nome de exibição</label>
-        <input type="text" id="sim-nome" placeholder="Ex: O Arquiteto" oninput="atualizar()">
-
-        <label>@usuário</label>
-        <input type="text" id="sim-usuario" placeholder="Ex: o.arquiteto.oficial" oninput="atualizar()">
-
-        <label>Bio</label>
-        <textarea id="sim-bio" rows="4" placeholder="Escreva sua bio aqui..." oninput="atualizar()" style="width:100%; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:12px 14px; border-radius:3px; font-family:'Inter',sans-serif; font-size:14px; resize:vertical;"></textarea>
-
-        <label>Nicho (só pra sua referência)</label>
-        <input type="text" id="sim-nicho" placeholder="Ex: Marketing digital, dark, motivacional...">
-
-        <div style="display:flex; gap:14px; margin-top:18px;">
-          <div style="flex:1;">
-            <label style="margin-top:0;">Publicações</label>
-            <input type="text" id="sim-posts" value="27" oninput="atualizar()">
-          </div>
-          <div style="flex:1;">
-            <label style="margin-top:0;">Seguidores</label>
-            <input type="text" id="sim-seguidores" value="1.204" oninput="atualizar()">
-          </div>
-          <div style="flex:1;">
-            <label style="margin-top:0;">Seguindo</label>
-            <input type="text" id="sim-seguindo" value="89" oninput="atualizar()">
-          </div>
-        </div>
-
-        <button onclick="salvar()" style="margin-top:24px;">Salvar simulação</button>
-        <div id="msg-sim" class="msg"></div>
+    <!-- VISUALIZAÇÃO DO PERFIL (tela principal) -->
+    <div class="ig-preview" id="tela-perfil">
+      <div class="ig-topbar">
+        <span class="ig-lock">🔒</span>
+        <span class="ig-username" id="ig-usuario-top">usuario</span>
+        <span class="ig-menu">☰</span>
       </div>
 
-      <!-- PREVIEW ESTILO INSTAGRAM -->
-      <div class="ig-preview">
-        <div class="ig-topbar">
-          <span class="ig-lock">🔒</span>
-          <span class="ig-username" id="ig-usuario-top">usuario</span>
-          <span class="ig-menu">☰</span>
+      <div class="ig-header">
+        <div class="ig-avatar" id="ig-avatar">
+          <span id="ig-avatar-placeholder">📷</span>
         </div>
-
-        <div class="ig-header">
-          <div class="ig-avatar" id="ig-avatar">
-            <span id="ig-avatar-placeholder">📷</span>
-          </div>
-          <div class="ig-stats">
-            <div class="ig-stat"><b id="ig-posts">27</b><span>Publicações</span></div>
-            <div class="ig-stat"><b id="ig-seguidores">1.204</b><span>Seguidores</span></div>
-            <div class="ig-stat"><b id="ig-seguindo">89</b><span>Seguindo</span></div>
-          </div>
+        <div class="ig-stats">
+          <div class="ig-stat"><b id="ig-posts">27</b><span>Publicações</span></div>
+          <div class="ig-stat"><b id="ig-seguidores">1.204</b><span>Seguidores</span></div>
+          <div class="ig-stat"><b id="ig-seguindo">89</b><span>Seguindo</span></div>
         </div>
+      </div>
 
-        <div class="ig-name" id="ig-nome">Seu Nome</div>
-        <div class="ig-bio" id="ig-bio">Sua bio vai aparecer aqui...</div>
+      <div class="ig-name" id="ig-nome">Seu Nome</div>
+      <div class="ig-bio" id="ig-bio">Sua bio vai aparecer aqui...</div>
 
-        <div class="ig-buttons">
-          <button class="ig-btn-edit">Editar perfil</button>
-          <button class="ig-btn-edit">Compartilhar perfil</button>
+      <div class="ig-buttons">
+        <button class="ig-btn-edit" onclick="abrirEdicao()">Editar perfil</button>
+        <button class="ig-btn-edit">Compartilhar perfil</button>
+      </div>
+
+      <div class="ig-highlights">
+        <div class="ig-highlight"><div class="ig-highlight-circle">+</div><span>Novo</span></div>
+        <div class="ig-highlight"><div class="ig-highlight-circle"></div><span>Sobre</span></div>
+        <div class="ig-highlight"><div class="ig-highlight-circle"></div><span>Provas</span></div>
+      </div>
+
+      <div class="ig-tabs">
+        <div class="ig-tab active">▦</div>
+        <div class="ig-tab">▷</div>
+        <div class="ig-tab">👤</div>
+      </div>
+
+      <div class="ig-grid" id="ig-grid"></div>
+    </div>
+
+    <!-- TELA DE EDIÇÃO (some por padrão, igual ao Instagram) -->
+    <div class="ig-preview ig-edit-screen" id="tela-edicao" style="display:none;">
+      <div class="ig-edit-topbar">
+        <button class="ig-edit-cancelar" onclick="fecharEdicao()">Cancelar</button>
+        <span>Editar perfil</span>
+        <button class="ig-edit-concluir" onclick="salvarEdicao()">Concluído</button>
+      </div>
+
+      <div class="ig-edit-avatar-row">
+        <div class="ig-avatar" id="edit-avatar-preview" style="width:64px; height:64px;">
+          <span id="edit-avatar-placeholder">📷</span>
         </div>
+        <label class="ig-trocar-foto">
+          Alterar foto do perfil
+          <input type="file" id="sim-foto" accept="image/*" onchange="lerFoto(event)" style="display:none;">
+        </label>
+      </div>
 
-        <div class="ig-highlights">
-          <div class="ig-highlight"><div class="ig-highlight-circle">+</div><span>Novo</span></div>
-          <div class="ig-highlight"><div class="ig-highlight-circle"></div><span>Sobre</span></div>
-          <div class="ig-highlight"><div class="ig-highlight-circle"></div><span>Provas</span></div>
+      <div class="ig-edit-field">
+        <label>Nome</label>
+        <input type="text" id="sim-nome" placeholder="Ex: O Arquiteto">
+      </div>
+      <div class="ig-edit-field">
+        <label>Usuário</label>
+        <input type="text" id="sim-usuario" placeholder="Ex: o.arquiteto.oficial">
+      </div>
+      <div class="ig-edit-field">
+        <label>Bio</label>
+        <textarea id="sim-bio" rows="3" placeholder="Escreva sua bio aqui..."></textarea>
+      </div>
+      <div class="ig-edit-field">
+        <label>Nicho (só sua referência, não aparece no perfil)</label>
+        <input type="text" id="sim-nicho" placeholder="Ex: marketing digital, dark...">
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <div class="ig-edit-field" style="flex:1;">
+          <label>Publicações</label>
+          <input type="text" id="sim-posts" value="27">
         </div>
-
-        <div class="ig-tabs">
-          <div class="ig-tab active">▦</div>
-          <div class="ig-tab">▷</div>
-          <div class="ig-tab">👤</div>
+        <div class="ig-edit-field" style="flex:1;">
+          <label>Seguidores</label>
+          <input type="text" id="sim-seguidores" value="1.204">
         </div>
-
-        <div class="ig-grid" id="ig-grid"></div>
+        <div class="ig-edit-field" style="flex:1;">
+          <label>Seguindo</label>
+          <input type="text" id="sim-seguindo" value="89">
+        </div>
       </div>
     </div>
   </div>
@@ -105,6 +124,10 @@
   <script src="config.js"></script>
   <script>
     let fotoBase64 = null;
+
+    function toggleMenu(){
+      document.getElementById('nav-dropdown').classList.toggle('open');
+    }
 
     async function checarAcesso(){
       const { data: { user } } = await supabaseClient.auth.getUser();
@@ -116,18 +139,40 @@
       return profile;
     }
 
+    function abrirEdicao(){
+      document.getElementById('tela-perfil').style.display = 'none';
+      document.getElementById('tela-edicao').style.display = 'block';
+    }
+
+    function fecharEdicao(){
+      document.getElementById('tela-edicao').style.display = 'none';
+      document.getElementById('tela-perfil').style.display = 'block';
+    }
+
     function lerFoto(event){
       const file = event.target.files[0];
       if(!file) return;
       const reader = new FileReader();
       reader.onload = function(e){
         fotoBase64 = e.target.result;
-        atualizar();
+        aplicarFotoNosPreviews();
       };
       reader.readAsDataURL(file);
     }
 
-    function atualizar(){
+    function aplicarFotoNosPreviews(){
+      if(!fotoBase64) return;
+      ['ig-avatar','edit-avatar-preview'].forEach(id => {
+        const el = document.getElementById(id);
+        el.style.backgroundImage = `url(${fotoBase64})`;
+        el.style.backgroundSize = 'cover';
+        el.style.backgroundPosition = 'center';
+      });
+      document.getElementById('ig-avatar-placeholder').style.display = 'none';
+      document.getElementById('edit-avatar-placeholder').style.display = 'none';
+    }
+
+    function salvarEdicao(){
       const nome = document.getElementById('sim-nome').value || 'Seu Nome';
       const usuario = document.getElementById('sim-usuario').value || 'usuario';
       const bio = document.getElementById('sim-bio').value || 'Sua bio vai aparecer aqui...';
@@ -142,19 +187,10 @@
       document.getElementById('ig-seguidores').textContent = seguidores;
       document.getElementById('ig-seguindo').textContent = seguindo;
 
-      const avatar = document.getElementById('ig-avatar');
-      if(fotoBase64){
-        avatar.style.backgroundImage = `url(${fotoBase64})`;
-        avatar.style.backgroundSize = 'cover';
-        avatar.style.backgroundPosition = 'center';
-        document.getElementById('ig-avatar-placeholder').style.display = 'none';
-      }
-
-      // monta grid de posts fake (usa a mesma foto se tiver, senão placeholders)
       const grid = document.getElementById('ig-grid');
-      const totalPosts = Math.min(parseInt(posts) || 9, 9);
+      const totalPosts = Math.max(Math.min(parseInt(posts) || 9, 9), 6);
       grid.innerHTML = '';
-      for(let i = 0; i < Math.max(totalPosts, 6); i++){
+      for(let i = 0; i < totalPosts; i++){
         const div = document.createElement('div');
         div.className = 'ig-post';
         if(fotoBase64){
@@ -164,27 +200,13 @@
         }
         grid.appendChild(div);
       }
-    }
 
-    function salvar(){
-      const dados = {
-        nome: document.getElementById('sim-nome').value,
-        usuario: document.getElementById('sim-usuario').value,
-        bio: document.getElementById('sim-bio').value,
+      const dados = { nome, usuario, bio,
         nicho: document.getElementById('sim-nicho').value,
-        posts: document.getElementById('sim-posts').value,
-        seguidores: document.getElementById('sim-seguidores').value,
-        seguindo: document.getElementById('sim-seguindo').value,
-        foto: fotoBase64
-      };
-      try{
-        localStorage.setItem('simulador-perfil', JSON.stringify(dados));
-        const msg = document.getElementById('msg-sim');
-        msg.textContent = 'Simulação salva neste navegador!';
-        msg.className = 'msg show ok';
-      } catch(e){
-        console.error(e);
-      }
+        posts, seguidores, seguindo, foto: fotoBase64 };
+      try{ localStorage.setItem('simulador-perfil', JSON.stringify(dados)); } catch(e){ console.error(e); }
+
+      fecharEdicao();
     }
 
     function carregarSalvo(){
@@ -200,7 +222,33 @@
         document.getElementById('sim-seguidores').value = dados.seguidores || '1.204';
         document.getElementById('sim-seguindo').value = dados.seguindo || '89';
         fotoBase64 = dados.foto || null;
+        if(fotoBase64) aplicarFotoNosPreviews();
+        aplicarDadosNaTelaDePerfil(dados);
       } catch(e){ console.error(e); }
+    }
+
+    // aplica os dados salvos na tela de perfil sem abrir a edição (usado só no carregamento)
+    function aplicarDadosNaTelaDePerfil(dados){
+      document.getElementById('ig-nome').textContent = dados.nome || 'Seu Nome';
+      document.getElementById('ig-usuario-top').textContent = dados.usuario || 'usuario';
+      document.getElementById('ig-bio').textContent = dados.bio || 'Sua bio vai aparecer aqui...';
+      document.getElementById('ig-posts').textContent = dados.posts || '27';
+      document.getElementById('ig-seguidores').textContent = dados.seguidores || '1.204';
+      document.getElementById('ig-seguindo').textContent = dados.seguindo || '89';
+
+      const grid = document.getElementById('ig-grid');
+      const totalPosts = Math.max(Math.min(parseInt(dados.posts) || 9, 9), 6);
+      grid.innerHTML = '';
+      for(let i = 0; i < totalPosts; i++){
+        const div = document.createElement('div');
+        div.className = 'ig-post';
+        if(fotoBase64){
+          div.style.backgroundImage = `url(${fotoBase64})`;
+          div.style.backgroundSize = 'cover';
+          div.style.backgroundPosition = 'center';
+        }
+        grid.appendChild(div);
+      }
     }
 
     async function sair(){
@@ -210,7 +258,7 @@
 
     (async () => {
       const ok = await checarAcesso();
-      if(ok){ carregarSalvo(); atualizar(); }
+      if(ok){ carregarSalvo(); }
     })();
   </script>
 </body>

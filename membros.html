@@ -8,14 +8,19 @@
 </head>
 <body>
   <div class="topbar">
-    <div class="eyebrow">Área de membros</div>
+    <div class="nav-menu-wrap">
+      <button class="nav-menu-trigger" onclick="toggleMenu()">Área de Membros ▾</button>
+      <div class="nav-menu-dropdown" id="nav-dropdown">
+        <a class="nav-menu-item current" href="membros.html">Área de Membros</a>
+        <a class="nav-menu-item" href="simulador.html">Simulador de Perfil</a>
+      </div>
+    </div>
     <a class="logout" href="#" onclick="sair()">Sair</a>
   </div>
 
   <div class="dash-header">
     <h1 class="dash-titulo">Planta Mestra</h1>
     <p class="dash-sub">Selecione um módulo para continuar a construção</p>
-    <a href="simulador.html" class="btn" style="display:inline-block; width:auto; margin-top:18px; padding:10px 20px;">🔧 Simulador de Perfil</a>
   </div>
 
   <div class="modules-grid" id="modules">
@@ -25,6 +30,10 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script>
+    function toggleMenu(){
+      document.getElementById('nav-dropdown').classList.toggle('open');
+    }
+
     async function checarAcesso(){
       const { data: { user } } = await supabaseClient.auth.getUser();
       if(!user){ window.location.href = 'login.html'; return null; }
