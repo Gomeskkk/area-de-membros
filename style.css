@@ -326,3 +326,80 @@ button:hover, .btn:hover{ background: #f08a1f; }
   color: var(--accent);
   letter-spacing: 0.08em;
 }
+
+/* ============ DASHBOARD ESTILO NETFLIX ============ */
+.dash-header{
+  padding: 40px 40px 10px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.dash-titulo{
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 26px;
+  color: var(--text);
+}
+.dash-sub{
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.modules-grid{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 40px 60px 40px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 22px;
+}
+
+.module-card{
+  text-decoration: none;
+  display: block;
+  transition: transform 0.18s ease;
+}
+.module-card:hover{ transform: translateY(-4px); }
+
+.module-card-cover{
+  aspect-ratio: 3 / 4;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  position: relative;
+  box-shadow: 0 0 0 rgba(217,119,6,0);
+  transition: box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.module-card:hover .module-card-cover{
+  border-color: var(--accent);
+  box-shadow: 0 0 24px rgba(217,119,6,0.35);
+}
+.module-card-cover img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.module-card-fallback{
+  width: 100%;
+  height: 100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family: 'Oswald', sans-serif;
+  font-size: 44px;
+  color: var(--accent);
+}
+.module-card-label{
+  margin-top: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+}
+.module-card:hover .module-card-label{ color: var(--text); }

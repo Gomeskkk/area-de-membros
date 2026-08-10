@@ -12,8 +12,13 @@
     <a class="logout" href="#" onclick="sair()">Sair</a>
   </div>
 
-  <div class="modules" id="modules">
-    <p style="color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:13px;">Carregando módulos...</p>
+  <div class="dash-header">
+    <h1 class="dash-titulo">Planta Mestra</h1>
+    <p class="dash-sub">Selecione um módulo para continuar a construção</p>
+  </div>
+
+  <div class="modules-grid" id="modules">
+    <p style="color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:13px; padding: 0 40px;">Carregando módulos...</p>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -39,38 +44,21 @@
       const { data: modulos } = await supabaseClient
         .from('modules').select('*').order('ordem', { ascending: true });
 
-      const { data: pdfs } = await supabaseClient
-        .from('pdfs').select('*').order('ordem', { ascending: true });
-
       const container = document.getElementById('modules');
       if(!modulos || modulos.length === 0){
         container.innerHTML = '<p style="color:var(--muted)">Nenhum módulo publicado ainda.</p>';
         return;
       }
 
-      container.innerHTML = modulos.map((m, i) => {
-        const seusPdfs = (pdfs||[]).filter(p => p.module_id === m.id);
-        return `
-        <div class="module">
-          <div class="module-head" onclick="toggle(${i})">
-            <div class="module-num">${String(i+1).padStart(2,'0')}</div>
-            <div class="module-title">${m.titulo}</div>
+      container.innerHTML = modulos.map((m, i) => `
+        <a class="module-card" href="modulo.html?id=${m.id}">
+          <div class="module-card-cover">
+            ${m.capa_url
+              ? `<img src="${m.capa_url}" alt="${m.titulo}">`
+              : `<div class="module-card-fallback">${String(i+1).padStart(2,'0')}</div>`}
           </div>
-          <div class="module-body" id="mod-${i}">
-            ${seusPdfs.length === 0
-              ? '<p style="color:var(--muted); font-size:13px;">Nenhuma aula neste módulo ainda.</p>'
-              : seusPdfs.map(p => `
-                <div class="aula-item" onclick="window.location.href='aula.html?id=${p.id}'">
-                  <span class="aula-item-titulo">${p.titulo}</span>
-                  <span class="aula-item-arrow">Acessar →</span>
-                </div>`).join('')}
-          </div>
-        </div>`;
-      }).join('');
-    }
-
-    function toggle(i){
-      document.getElementById('mod-'+i).classList.toggle('open');
+          <div class="module-card-label">${m.titulo}</div>
+        </a>`).join('');
     }
 
     async function sair(){

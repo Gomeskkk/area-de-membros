@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Módulo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="eyebrow">Planta Mestra</div>
+    <a class="logout" href="#" onclick="sair()">Sair</a>
+  </div>
+
+  <div class="aula-wrap">
+    <a class="aula-back" href="membros.html">← Voltar aos módulos</a>
+    <div class="aula-eyebrow">Módulo</div>
+    <h1 class="aula-titulo" id="modulo-titulo">Carregando...</h1>
+
+    <div class="module" style="margin-top: 20px;">
+      <div class="module-body open" id="lista-aulas" style="padding: 10px 24px;"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    function getParam(nome){
+      return new URLSearchParams(window.location.search).get(nome);
+    }
+
+    async function checarAcesso(){
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if(!user){ window.location.href = 'login.html'; return null; }
+      const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
+      if(!profile || (!profile.approved && !profile.is_admin)){
+        window.location.href = 'pendente.html'; return null;
+      }
+      return profile;
+    }
+
+    async function carregarModulo(){
+      const profile = await checarAcesso();
+      if(!profile) return;
+
+      const moduloId = getParam('id');
+      if(!moduloId){ window.location.href = 'membros.html'; return; }
+
+      const { data: modulo } = await supabaseClient.from('modules').select('*').eq('id', moduloId).single();
+      if(!modulo){ window.location.href = 'membros.html'; return; }
+
+      document.getElementById('modulo-titulo').textContent = modulo.titulo;
+
+      const { data: aulas } = await supabaseClient
+        .from('pdfs').select('*').eq('module_id', moduloId).order('ordem', { ascending: true });
+
+      const container = document.getElementById('lista-aulas');
+      if(!aulas || aulas.length === 0){
+        container.innerHTML = '<p style="color:var(--muted); font-size:13px;">Nenhuma aula neste módulo ainda.</p>';
+        return;
+      }
+
+      container.innerHTML = aulas.map(a => `
+        <div class="aula-item" onclick="window.location.href='aula.html?id=${a.id}'">
+          <span class="aula-item-titulo">${a.titulo}</span>
+          <span class="aula-item-arrow">Acessar →</span>
+        </div>`).join('');
+    }
+
+    async function sair(){
+      await supabaseClient.auth.signOut();
+      window.location.href = 'login.html';
+    }
+
+    carregarModulo();
+  </script>
+</body>
+</html>
