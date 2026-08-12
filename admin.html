@@ -9,7 +9,14 @@
 </head>
 <body>
   <div class="topbar">
-    <div class="eyebrow">Painel master</div>
+    <div class="nav-menu-wrap">
+      <button class="nav-menu-trigger" onclick="toggleMenu()">Painel Master ▾</button>
+      <div class="nav-menu-dropdown" id="nav-dropdown">
+        <a class="nav-menu-item current" href="admin.html">Painel Master</a>
+        <a class="nav-menu-item" href="membros.html">Área de Membros</a>
+        <a class="nav-menu-item" href="simulador.html">Simulador de Perfil</a>
+      </div>
+    </div>
     <a class="logout" href="#" onclick="sair()">Sair</a>
   </div>
 
@@ -67,6 +74,17 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script>
+    function toggleMenu(){
+      document.getElementById('nav-dropdown').classList.toggle('open');
+    }
+
+    document.addEventListener('click', function(e){
+      if(!e.target.closest('.nav-menu-wrap')){
+        const m = document.getElementById('nav-dropdown');
+        if(m) m.classList.remove('open');
+      }
+    });
+
     async function checarAdmin(){
       const { data: { session } } = await supabaseClient.auth.getSession();
       if(!session){ window.location.href = 'login.html'; return null; }

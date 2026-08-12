@@ -34,10 +34,7 @@
 
   <div class="dash-header">
     <h1 class="dash-titulo">Planta Mestra</h1>
-    <p class="dash-sub">
-      Selecione um módulo para continuar a construção
-      <span id="stat-streak" class="streak-inline" style="display:none;">· 🔥 <span id="streak-numero">0</span> dias seguidos</span>
-    </p>
+    <p class="dash-sub">Selecione um módulo para continuar a construção</p>
 
     <div id="continuar-banner"></div>
 
@@ -62,26 +59,6 @@
 
   <div class="modules-grid" id="modules">
     <p style="color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:13px; padding: 0 40px;">Carregando módulos...</p>
-  </div>
-
-  <div class="alunos-ativos-fixed" id="stat-alunos" style="display:none;">👥 <span id="alunos-numero">0</span> construtores ativos</div>
-
-  <div class="depoimentos-wrap">
-    <h3 class="depoimentos-titulo">Quem já está construindo</h3>
-    <div class="depoimentos-grid">
-      <div class="depoimento-card">
-        <div class="depoimento-texto">"Segui o mapa certinho e em 3 semanas meu perfil já tinha outra cara. Bora pra próxima fase."</div>
-        <div class="depoimento-autor">— Aluno, Fase 03</div>
-      </div>
-      <div class="depoimento-card">
-        <div class="depoimento-texto">"O que mais gostei foi não ter enrolação. Cada missão tem um motivo pra existir."</div>
-        <div class="depoimento-autor">— Aluno, Fase 04</div>
-      </div>
-      <div class="depoimento-card">
-        <div class="depoimento-texto">"Achei que ia ser só mais um PDF, mas a área de membros deixa tudo mais sério."</div>
-        <div class="depoimento-autor">— Aluno, Obra Concluída</div>
-      </div>
-    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -155,9 +132,18 @@
 
       carregarProgresso(profile.id, todasAulas ? todasAulas.length : 0, concluidasIds.size);
       carregarContinuar(profile.id);
-      carregarStreak(profile.id);
-      carregarContadorAlunos();
+      if(profile.is_admin) adicionarItemMasterNoMenu();
       esconderLoader();
+    }
+
+    function adicionarItemMasterNoMenu(){
+      const dropdown = document.getElementById('nav-dropdown');
+      if(dropdown.querySelector('a[href="admin.html"]')) return;
+      const item = document.createElement('a');
+      item.className = 'nav-menu-item nav-menu-item-master';
+      item.href = 'admin.html';
+      item.textContent = 'Painel Master';
+      dropdown.appendChild(item);
     }
 
     function esconderLoader(){
@@ -189,45 +175,6 @@
           <span class="continuar-label">Continuar de onde parou</span>
           <span class="continuar-titulo">${aula.titulo} →</span>
         </a>`;
-    }
-
-    async function carregarStreak(userId){
-      const { data: dias } = await supabaseClient
-        .from('atividade_diaria').select('dia').eq('user_id', userId).order('dia', { ascending: false });
-
-      if(!dias || dias.length === 0) return;
-
-      let streak = 0;
-      let cursor = new Date();
-      cursor.setHours(0,0,0,0);
-
-      const diasSet = new Set(dias.map(d => d.dia));
-
-      // permite que hoje ainda não tenha atividade sem quebrar a sequência de ontem
-      let dataChecagem = new Date(cursor);
-      if(!diasSet.has(dataChecagem.toISOString().split('T')[0])){
-        dataChecagem.setDate(dataChecagem.getDate() - 1);
-      }
-
-      while(diasSet.has(dataChecagem.toISOString().split('T')[0])){
-        streak++;
-        dataChecagem.setDate(dataChecagem.getDate() - 1);
-      }
-
-      if(streak > 0){
-        document.getElementById('stat-streak').style.display = 'inline-flex';
-        document.getElementById('streak-numero').textContent = streak;
-      }
-    }
-
-    async function carregarContadorAlunos(){
-      const { count } = await supabaseClient
-        .from('profiles').select('*', { count: 'exact', head: true }).eq('approved', true);
-
-      if(count && count > 0){
-        document.getElementById('stat-alunos').style.display = 'inline-flex';
-        document.getElementById('alunos-numero').textContent = count;
-      }
     }
 
     function buscarAulas(termo){

@@ -710,7 +710,7 @@ button:hover, .btn:hover{ background: #f08a1f; }
   background: var(--accent);
   color: #fff;
 }
-.btn-concluir.concluida:hover{ background: #c2151f; }
+.btn-concluir.concluida:hover{ background: #b86205; }
 .btn-concluir:disabled{ opacity: 0.6; cursor: default; }
 
 /* ============ BLOCO DE ANOTAÇÕES FLUTUANTE ============ */
@@ -731,7 +731,7 @@ button:hover, .btn:hover{ background: #f08a1f; }
   box-shadow: 0 8px 24px rgba(217,119,6,0.35);
   margin-top: 0;
 }
-.notas-toggle:hover{ background: #c2151f; }
+.notas-toggle:hover{ background: #b86205; }
 
 .notas-painel{
   display:none;
@@ -939,7 +939,7 @@ button:hover, .btn:hover{ background: #f08a1f; }
   cursor: pointer;
   margin-top: 0;
 }
-.perfil-chip:hover{ background: #c2151f; }
+.perfil-chip:hover{ background: #b86205; }
 .perfil-dropdown{
   display:none;
   position:absolute;
