@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Painel Master</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://drlmrqgqauzbrderovik.supabase.co">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -51,8 +52,9 @@
   <script src="config.js"></script>
   <script>
     async function checarAdmin(){
-      const { data: { user } } = await supabaseClient.auth.getUser();
-      if(!user){ window.location.href = 'login.html'; return null; }
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if(!session){ window.location.href = 'login.html'; return null; }
+      const user = session.user;
       const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
       if(!profile || !profile.is_admin){ window.location.href = 'membros.html'; return null; }
       return profile;

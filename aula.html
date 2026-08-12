@@ -35,6 +35,19 @@
     </div>
   </div>
 
+  <!-- BLOCO DE ANOTAÇÕES FLUTUANTE -->
+  <div class="notas-flutuante">
+    <button class="notas-toggle" id="notas-toggle" onclick="toggleNotas()">📝</button>
+    <div class="notas-painel" id="notas-painel">
+      <div class="notas-header">
+        <span>Suas anotações</span>
+        <button class="notas-fechar" onclick="toggleNotas()">✕</button>
+      </div>
+      <textarea id="notas-texto" placeholder="Anote aqui os insights dessa aula..." oninput="salvarNotas()"></textarea>
+      <button class="notas-baixar" onclick="baixarNotas()">⬇ Baixar anotações</button>
+    </div>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
@@ -87,6 +100,10 @@
       return new URLSearchParams(window.location.search).get(nome);
     }
 
+    let currentUserId = null;
+    let currentAulaId = null;
+    let concluida = false;
+
     async function checarAcesso(){
       const { data: { session } } = await supabaseClient.auth.getSession();
       if(!session){ window.location.href = 'login.html'; return null; }
@@ -101,9 +118,11 @@
     async function carregarAula(){
       const profile = await checarAcesso();
       if(!profile) return;
+      currentUserId = profile.id;
 
       const aulaId = getParam('id');
       if(!aulaId){ window.location.href = 'membros.html'; return; }
+      currentAulaId = aulaId;
 
       const { data: aula } = await supabaseClient.from('pdfs').select('*').eq('id', aulaId).single();
       if(!aula){ window.location.href = 'membros.html'; return; }
@@ -113,6 +132,18 @@
       document.getElementById('modulo-nome').textContent = modulo ? modulo.titulo : '';
       document.getElementById('aula-nome').textContent = aula.titulo;
       renderizarPdf(aula.url);
+      carregarNotas();
+
+      // registra essa aula como "último acesso" (pro botão continuar na dashboard)
+      supabaseClient.from('ultimo_acesso').upsert({
+        user_id: currentUserId, aula_id: aulaId, atualizado_em: new Date().toISOString()
+      }).then(() => {});
+
+      // checa se já está marcada como concluída
+      const { data: prog } = await supabaseClient
+        .from('progresso').select('*').eq('user_id', currentUserId).eq('aula_id', aulaId).maybeSingle();
+      concluida = !!prog;
+      atualizarBotaoConcluir();
 
       // monta navegação entre aulas do mesmo módulo
       const { data: aulasDoModulo } = await supabaseClient
@@ -130,6 +161,68 @@
 
       if(proxima){ btnProx.href = 'aula.html?id=' + proxima.id; }
       else { btnProx.href = 'membros.html'; btnProx.textContent = 'Voltar aos módulos →'; }
+    }
+
+    async function alternarConcluida(){
+      const btn = document.getElementById('btn-concluir');
+      btn.disabled = true;
+      if(concluida){
+        await supabaseClient.from('progresso').delete().eq('user_id', currentUserId).eq('aula_id', currentAulaId);
+        concluida = false;
+      } else {
+        await supabaseClient.from('progresso').insert({ user_id: currentUserId, aula_id: currentAulaId });
+        concluida = true;
+      }
+      btn.disabled = false;
+      atualizarBotaoConcluir();
+    }
+
+    function atualizarBotaoConcluir(){
+      const btn = document.getElementById('btn-concluir');
+      if(concluida){
+        btn.textContent = '✓ Aula concluída';
+        btn.classList.add('concluida');
+      } else {
+        btn.textContent = '✓ Marcar como concluída';
+        btn.classList.remove('concluida');
+      }
+    }
+
+    // ===== ANOTAÇÕES =====
+    function toggleNotas(){
+      document.getElementById('notas-painel').classList.toggle('open');
+    }
+
+    function chaveNotas(){
+      return 'notas-aula-' + currentAulaId;
+    }
+
+    function salvarNotas(){
+      try{
+        localStorage.setItem(chaveNotas(), document.getElementById('notas-texto').value);
+      } catch(e){ console.error(e); }
+    }
+
+    function carregarNotas(){
+      try{
+        const salvo = localStorage.getItem(chaveNotas());
+        document.getElementById('notas-texto').value = salvo || '';
+      } catch(e){ console.error(e); }
+    }
+
+    function baixarNotas(){
+      const texto = document.getElementById('notas-texto').value;
+      const titulo = document.getElementById('aula-nome').textContent || 'aula';
+      const nomeArquivo = 'anotacoes-' + titulo.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.txt';
+      const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nomeArquivo;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
 
     async function sair(){

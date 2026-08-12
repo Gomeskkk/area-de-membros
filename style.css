@@ -694,3 +694,177 @@ button:hover, .btn:hover{ background: #f08a1f; }
   line-height: 1;
 }
 .btn-mostrar-senha:hover{ background: none; }
+
+/* ============ BOTÃO MARCAR CONCLUÍDA ============ */
+.aula-marcar-wrap{ margin-top: 18px; }
+.btn-concluir{
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  width: auto;
+  margin-top: 0;
+  padding: 11px 20px;
+}
+.btn-concluir:hover{ background: rgba(217,119,6,0.1); }
+.btn-concluir.concluida{
+  background: var(--accent);
+  color: #fff;
+}
+.btn-concluir.concluida:hover{ background: #c2151f; }
+.btn-concluir:disabled{ opacity: 0.6; cursor: default; }
+
+/* ============ BLOCO DE ANOTAÇÕES FLUTUANTE ============ */
+.notas-flutuante{
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 50;
+}
+.notas-toggle{
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(217,119,6,0.35);
+  margin-top: 0;
+}
+.notas-toggle:hover{ background: #c2151f; }
+
+.notas-painel{
+  display:none;
+  position: absolute;
+  bottom: 66px;
+  right: 0;
+  width: 300px;
+  max-width: calc(100vw - 48px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+.notas-painel.open{ display:block; }
+
+.notas-header{
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.notas-fechar{
+  background:none; border:none; color: var(--muted);
+  cursor:pointer; font-size: 14px; width:auto; margin:0; padding:0;
+}
+.notas-fechar:hover{ color: var(--text); }
+
+.notas-painel textarea{
+  width: 100%;
+  height: 160px;
+  background: var(--bg);
+  border: none;
+  color: var(--text);
+  padding: 12px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+.notas-painel textarea:focus{ outline:none; }
+
+.notas-baixar{
+  width: 100%;
+  margin-top: 0;
+  border-radius: 0;
+  font-size: 11px;
+  padding: 12px;
+}
+
+/* ============ TOGGLE DE TEMA NO SIMULADOR ============ */
+.btn-tema-toggle{
+  width: auto;
+  margin: 0 0 20px 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 9px 16px;
+  font-size: 11px;
+}
+.btn-tema-toggle:hover{ background: var(--surface-2); }
+
+/* ============ MODO ESCURO DO PREVIEW (imita o Instagram dark mode) ============ */
+.ig-preview.ig-dark{
+  background: #000000;
+  color: #f5f5f5;
+}
+.ig-preview.ig-dark .ig-topbar{ border-color: #262626; }
+.ig-preview.ig-dark .ig-avatar{ background: #1a1a1a; border-color: #333; }
+.ig-preview.ig-dark .ig-name{ color: #f5f5f5; }
+.ig-preview.ig-dark .ig-bio{ color: #e0e0e0; }
+.ig-preview.ig-dark .ig-btn-edit{ background: #262626; color: #f5f5f5; }
+.ig-preview.ig-dark .ig-highlight-circle{ border-color: #333; color: #999; }
+.ig-preview.ig-dark .ig-highlight span{ color: #ccc; }
+.ig-preview.ig-dark .ig-tabs{ border-color: #262626; }
+.ig-preview.ig-dark .ig-tab.active{ color: #f5f5f5; border-color: #f5f5f5; }
+.ig-preview.ig-dark .ig-post{ background: #1a1a1a; }
+
+/* ============ BARRA DE PROGRESSO ============ */
+.progresso-wrap{ margin-top: 22px; max-width: 420px; }
+.progresso-info{
+  display:flex;
+  justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+#progresso-porcentagem{ color: var(--accent); }
+.progresso-bar{
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progresso-bar-fill{
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.4s ease;
+}
+
+/* ============ BANNER CONTINUAR DE ONDE PAROU ============ */
+.continuar-card{
+  display:block;
+  text-decoration:none;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: 14px 18px;
+  margin-top: 18px;
+  max-width: 420px;
+  box-shadow: 0 0 20px rgba(217,119,6,0.12);
+}
+.continuar-label{
+  display:block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.continuar-titulo{
+  display:block;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+}

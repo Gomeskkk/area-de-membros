@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Área de Membros</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://drlmrqgqauzbrderovik.supabase.co">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -21,6 +22,18 @@
   <div class="dash-header">
     <h1 class="dash-titulo">Planta Mestra</h1>
     <p class="dash-sub">Selecione um módulo para continuar a construção</p>
+
+    <div id="continuar-banner"></div>
+
+    <div class="progresso-wrap" id="progresso-wrap" style="display:none;">
+      <div class="progresso-info">
+        <span id="progresso-texto">0 de 0 aulas concluídas</span>
+        <span id="progresso-porcentagem">0%</span>
+      </div>
+      <div class="progresso-bar">
+        <div class="progresso-bar-fill" id="progresso-bar-fill"></div>
+      </div>
+    </div>
   </div>
 
   <div class="modules-grid" id="modules">
@@ -35,8 +48,9 @@
     }
 
     async function checarAcesso(){
-      const { data: { user } } = await supabaseClient.auth.getUser();
-      if(!user){ window.location.href = 'login.html'; return null; }
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if(!session){ window.location.href = 'login.html'; return null; }
+      const user = session.user;
 
       const { data: profile } = await supabaseClient
         .from('profiles').select('*').eq('id', user.id).single();
@@ -64,11 +78,49 @@
         <a class="module-card" href="modulo.html?id=${m.id}">
           <div class="module-card-cover">
             ${m.capa_url
-              ? `<img src="${m.capa_url}" alt="${m.titulo}">`
+              ? `<img src="${m.capa_url}" alt="${m.titulo}" loading="lazy">`
               : `<div class="module-card-fallback">${String(i+1).padStart(2,'0')}</div>`}
           </div>
           <div class="module-card-label">${m.titulo}</div>
         </a>`).join('');
+
+      carregarProgresso(profile.id);
+      carregarContinuar(profile.id);
+    }
+
+    async function carregarProgresso(userId){
+      const { count: totalAulas } = await supabaseClient
+        .from('pdfs').select('*', { count: 'exact', head: true });
+
+      const { count: concluidas } = await supabaseClient
+        .from('progresso').select('*', { count: 'exact', head: true }).eq('user_id', userId);
+
+      if(!totalAulas) return;
+
+      const porcentagem = Math.round(((concluidas || 0) / totalAulas) * 100);
+
+      document.getElementById('progresso-wrap').style.display = 'block';
+      document.getElementById('progresso-texto').textContent = `${concluidas || 0} de ${totalAulas} aulas concluídas`;
+      document.getElementById('progresso-porcentagem').textContent = `${porcentagem}%`;
+      document.getElementById('progresso-bar-fill').style.width = `${porcentagem}%`;
+    }
+
+    async function carregarContinuar(userId){
+      const { data: ultimo } = await supabaseClient
+        .from('ultimo_acesso').select('*').eq('user_id', userId).maybeSingle();
+
+      if(!ultimo) return;
+
+      const { data: aula } = await supabaseClient
+        .from('pdfs').select('*').eq('id', ultimo.aula_id).maybeSingle();
+
+      if(!aula) return;
+
+      document.getElementById('continuar-banner').innerHTML = `
+        <a href="aula.html?id=${aula.id}" class="continuar-card">
+          <span class="continuar-label">Continuar de onde parou</span>
+          <span class="continuar-titulo">${aula.titulo} →</span>
+        </a>`;
     }
 
     async function sair(){

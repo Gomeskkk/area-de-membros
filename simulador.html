@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Simulador de Perfil</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://drlmrqgqauzbrderovik.supabase.co">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -24,9 +25,11 @@
     <p style="color:var(--muted); font-size:13px; margin-bottom:12px;">
       Monte e visualize seu perfil antes de publicar de verdade no Instagram.
     </p>
-    <p style="color:var(--accent); font-size:12px; margin-bottom:24px; font-family:'JetBrains Mono',monospace;">
+    <p style="color:var(--accent); font-size:12px; margin-bottom:16px; font-family:'JetBrains Mono',monospace;">
       → Toque em "Editar perfil" abaixo pra preencher seus dados. Suas alterações são salvas automaticamente ao clicar em "Concluído".
     </p>
+
+    <button class="btn-tema-toggle" onclick="alternarTemaPreview()" id="btn-tema">🌙 Ver em modo escuro</button>
 
     <!-- VISUALIZAÇÃO DO PERFIL (tela principal) -->
     <div class="ig-preview" id="tela-perfil">
@@ -129,13 +132,21 @@
   <script>
     let fotoBase64 = null;
 
+    function alternarTemaPreview(){
+      const tela = document.getElementById('tela-perfil');
+      const btn = document.getElementById('btn-tema');
+      const escuro = tela.classList.toggle('ig-dark');
+      btn.textContent = escuro ? '☀️ Ver em modo claro' : '🌙 Ver em modo escuro';
+    }
+
     function toggleMenu(){
       document.getElementById('nav-dropdown').classList.toggle('open');
     }
 
     async function checarAcesso(){
-      const { data: { user } } = await supabaseClient.auth.getUser();
-      if(!user){ window.location.href = 'login.html'; return null; }
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if(!session){ window.location.href = 'login.html'; return null; }
+      const user = session.user;
       const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
       if(!profile || (!profile.approved && !profile.is_admin)){
         window.location.href = 'pendente.html'; return null;
