@@ -868,3 +868,232 @@ button:hover, .btn:hover{ background: #f08a1f; }
   font-size: 14px;
   font-weight: 500;
 }
+
+/* ============ CONFETE DE CELEBRAÇÃO ============ */
+.confete{
+  position: fixed;
+  top: 40vh;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  z-index: 200;
+  animation: cair-confete 1.4s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes cair-confete{
+  0%{ transform: translate(0,0) rotate(0deg); opacity: 1; }
+  100%{ transform: translate(var(--dx), 260px) rotate(540deg); opacity: 0; }
+}
+
+/* ============ TELA DE CARREGAMENTO (SPLASH) ============ */
+.app-loader{
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 999;
+  display:flex;
+  flex-direction: column;
+  align-items:center;
+  justify-content:center;
+  gap: 14px;
+  transition: opacity 0.4s ease;
+}
+.app-loader.fade-out{ opacity: 0; pointer-events: none; }
+.loader-logo{ font-size: 42px; }
+.loader-text{
+  font-family:'Oswald', sans-serif;
+  letter-spacing: 0.15em;
+  color: var(--text);
+  font-size: 14px;
+}
+.loader-bar{
+  width: 140px;
+  height: 3px;
+  background: var(--surface-2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.loader-bar-fill{
+  height: 100%;
+  width: 40%;
+  background: var(--accent);
+  animation: loader-anim 1s ease-in-out infinite;
+}
+@keyframes loader-anim{
+  0%{ transform: translateX(-100%); }
+  100%{ transform: translateX(350%); }
+}
+
+/* ============ CHIP DE PERFIL (avatar + menu) ============ */
+.perfil-chip-wrap{ position: relative; }
+.perfil-chip{
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  margin-top: 0;
+}
+.perfil-chip:hover{ background: #c2151f; }
+.perfil-dropdown{
+  display:none;
+  position:absolute;
+  top: 42px;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  min-width: 180px;
+  overflow:hidden;
+  z-index: 10;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.perfil-dropdown.open{ display:block; }
+.perfil-dropdown-nome{
+  padding: 12px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  word-break: break-word;
+}
+.perfil-dropdown a{
+  display:block;
+  padding: 12px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-decoration:none;
+}
+.perfil-dropdown a:hover{ background: var(--surface-2); }
+
+/* ============ ESTATÍSTICAS MINI (streak / alunos ativos) ============ */
+.dash-stats-row{
+  display:flex;
+  gap: 16px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.mini-stat{
+  display:inline-flex;
+  align-items:center;
+  gap: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+.mini-stat span{ color: var(--text); font-weight: 600; }
+
+/* ============ SELO DE MÓDULO CONCLUÍDO ============ */
+.module-badge{
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 0 12px rgba(217,119,6,0.6);
+}
+
+/* ============ BUSCA RÁPIDA ============ */
+.busca-wrap{
+  position: relative;
+  max-width: 420px;
+  margin-top: 20px;
+}
+.busca-wrap input{
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 11px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+}
+.busca-wrap input:focus{ outline:none; border-color: var(--accent); }
+.busca-resultados{
+  display:none;
+  position:absolute;
+  top: 46px;
+  left:0; right:0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow:hidden;
+  z-index: 10;
+  max-height: 260px;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.busca-resultados.open{ display:block; }
+.busca-item{
+  display:block;
+  padding: 11px 14px;
+  color: var(--text);
+  text-decoration:none;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+}
+.busca-item:last-child{ border-bottom:none; }
+.busca-item:hover{ background: var(--surface-2); color: var(--accent); }
+.busca-item-vazio{
+  padding: 14px;
+  color: var(--muted);
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ============ DEPOIMENTOS ============ */
+.depoimentos-wrap{
+  max-width: 1200px;
+  margin: 20px auto 70px auto;
+  padding: 0 40px;
+}
+.depoimentos-titulo{
+  font-family: 'Oswald', sans-serif;
+  text-transform: uppercase;
+  font-size: 18px;
+  color: var(--text);
+  margin-bottom: 18px;
+}
+.depoimentos-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+.depoimento-card{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 18px;
+}
+.depoimento-texto{
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+.depoimento-autor{
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+}

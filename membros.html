@@ -8,6 +8,13 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- TELA DE CARREGAMENTO -->
+  <div class="app-loader" id="app-loader">
+    <div class="loader-logo">🏗️</div>
+    <div class="loader-text">O ARQUITETO</div>
+    <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+  </div>
+
   <div class="topbar">
     <div class="nav-menu-wrap">
       <button class="nav-menu-trigger" onclick="toggleMenu()">Área de Membros ▾</button>
@@ -16,12 +23,28 @@
         <a class="nav-menu-item" href="simulador.html">Simulador de Perfil</a>
       </div>
     </div>
-    <a class="logout" href="#" onclick="sair()">Sair</a>
+    <div class="perfil-chip-wrap">
+      <button class="perfil-chip" onclick="togglePerfilMenu()" id="perfil-chip">?</button>
+      <div class="perfil-dropdown" id="perfil-dropdown">
+        <div class="perfil-dropdown-nome" id="perfil-dropdown-nome">—</div>
+        <a href="#" onclick="sair()">Sair</a>
+      </div>
+    </div>
   </div>
 
   <div class="dash-header">
     <h1 class="dash-titulo">Planta Mestra</h1>
     <p class="dash-sub">Selecione um módulo para continuar a construção</p>
+
+    <div class="dash-stats-row">
+      <div class="mini-stat" id="stat-streak" style="display:none;">🔥 <span id="streak-numero">0</span> dias seguidos</div>
+      <div class="mini-stat" id="stat-alunos" style="display:none;">👥 <span id="alunos-numero">0</span> construtores ativos</div>
+    </div>
+
+    <div class="busca-wrap">
+      <input type="text" id="busca-input" placeholder="Buscar uma aula pelo nome..." oninput="buscarAulas(this.value)">
+      <div class="busca-resultados" id="busca-resultados"></div>
+    </div>
 
     <div id="continuar-banner"></div>
 
@@ -40,11 +63,35 @@
     <p style="color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:13px; padding: 0 40px;">Carregando módulos...</p>
   </div>
 
+  <div class="depoimentos-wrap">
+    <h3 class="depoimentos-titulo">Quem já está construindo</h3>
+    <div class="depoimentos-grid">
+      <div class="depoimento-card">
+        <div class="depoimento-texto">"Segui o mapa certinho e em 3 semanas meu perfil já tinha outra cara. Bora pra próxima fase."</div>
+        <div class="depoimento-autor">— Aluno, Fase 03</div>
+      </div>
+      <div class="depoimento-card">
+        <div class="depoimento-texto">"O que mais gostei foi não ter enrolação. Cada missão tem um motivo pra existir."</div>
+        <div class="depoimento-autor">— Aluno, Fase 04</div>
+      </div>
+      <div class="depoimento-card">
+        <div class="depoimento-texto">"Achei que ia ser só mais um PDF, mas a área de membros deixa tudo mais sério."</div>
+        <div class="depoimento-autor">— Aluno, Obra Concluída</div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script>
+    let cacheAulas = [];
+
     function toggleMenu(){
       document.getElementById('nav-dropdown').classList.toggle('open');
+    }
+
+    function togglePerfilMenu(){
+      document.getElementById('perfil-dropdown').classList.toggle('open');
     }
 
     async function checarAcesso(){
@@ -65,42 +112,62 @@
       const profile = await checarAcesso();
       if(!profile) return;
 
+      document.getElementById('perfil-chip').textContent = (profile.nome || '?').charAt(0).toUpperCase();
+      document.getElementById('perfil-dropdown-nome').textContent = profile.nome || profile.email;
+
       const { data: modulos } = await supabaseClient
         .from('modules').select('*').order('ordem', { ascending: true });
+
+      const { data: todasAulas } = await supabaseClient
+        .from('pdfs').select('*').order('ordem', { ascending: true });
+
+      cacheAulas = todasAulas || [];
+
+      const { data: progressoAtual } = await supabaseClient
+        .from('progresso').select('aula_id').eq('user_id', profile.id);
+
+      const concluidasIds = new Set((progressoAtual || []).map(p => p.aula_id));
 
       const container = document.getElementById('modules');
       if(!modulos || modulos.length === 0){
         container.innerHTML = '<p style="color:var(--muted)">Nenhum módulo publicado ainda.</p>';
+        esconderLoader();
         return;
       }
 
-      container.innerHTML = modulos.map((m, i) => `
+      container.innerHTML = modulos.map((m, i) => {
+        const aulasDoModulo = cacheAulas.filter(a => a.module_id === m.id);
+        const todasConcluidas = aulasDoModulo.length > 0 && aulasDoModulo.every(a => concluidasIds.has(a.id));
+        return `
         <a class="module-card" href="modulo.html?id=${m.id}">
           <div class="module-card-cover">
             ${m.capa_url
               ? `<img src="${m.capa_url}" alt="${m.titulo}" loading="lazy">`
               : `<div class="module-card-fallback">${String(i+1).padStart(2,'0')}</div>`}
+            ${todasConcluidas ? '<div class="module-badge">✓</div>' : ''}
           </div>
           <div class="module-card-label">${m.titulo}</div>
-        </a>`).join('');
+        </a>`;
+      }).join('');
 
-      carregarProgresso(profile.id);
+      carregarProgresso(profile.id, todasAulas ? todasAulas.length : 0, concluidasIds.size);
       carregarContinuar(profile.id);
+      carregarStreak(profile.id);
+      carregarContadorAlunos();
+      esconderLoader();
     }
 
-    async function carregarProgresso(userId){
-      const { count: totalAulas } = await supabaseClient
-        .from('pdfs').select('*', { count: 'exact', head: true });
+    function esconderLoader(){
+      const loader = document.getElementById('app-loader');
+      loader.classList.add('fade-out');
+      setTimeout(() => loader.remove(), 400);
+    }
 
-      const { count: concluidas } = await supabaseClient
-        .from('progresso').select('*', { count: 'exact', head: true }).eq('user_id', userId);
-
+    function carregarProgresso(userId, totalAulas, concluidas){
       if(!totalAulas) return;
-
-      const porcentagem = Math.round(((concluidas || 0) / totalAulas) * 100);
-
+      const porcentagem = Math.round((concluidas / totalAulas) * 100);
       document.getElementById('progresso-wrap').style.display = 'block';
-      document.getElementById('progresso-texto').textContent = `${concluidas || 0} de ${totalAulas} aulas concluídas`;
+      document.getElementById('progresso-texto').textContent = `${concluidas} de ${totalAulas} aulas concluídas`;
       document.getElementById('progresso-porcentagem').textContent = `${porcentagem}%`;
       document.getElementById('progresso-bar-fill').style.width = `${porcentagem}%`;
     }
@@ -111,9 +178,7 @@
 
       if(!ultimo) return;
 
-      const { data: aula } = await supabaseClient
-        .from('pdfs').select('*').eq('id', ultimo.aula_id).maybeSingle();
-
+      const aula = cacheAulas.find(a => a.id === ultimo.aula_id);
       if(!aula) return;
 
       document.getElementById('continuar-banner').innerHTML = `
@@ -122,6 +187,77 @@
           <span class="continuar-titulo">${aula.titulo} →</span>
         </a>`;
     }
+
+    async function carregarStreak(userId){
+      const { data: dias } = await supabaseClient
+        .from('atividade_diaria').select('dia').eq('user_id', userId).order('dia', { ascending: false });
+
+      if(!dias || dias.length === 0) return;
+
+      let streak = 0;
+      let cursor = new Date();
+      cursor.setHours(0,0,0,0);
+
+      const diasSet = new Set(dias.map(d => d.dia));
+
+      // permite que hoje ainda não tenha atividade sem quebrar a sequência de ontem
+      let dataChecagem = new Date(cursor);
+      if(!diasSet.has(dataChecagem.toISOString().split('T')[0])){
+        dataChecagem.setDate(dataChecagem.getDate() - 1);
+      }
+
+      while(diasSet.has(dataChecagem.toISOString().split('T')[0])){
+        streak++;
+        dataChecagem.setDate(dataChecagem.getDate() - 1);
+      }
+
+      if(streak > 0){
+        document.getElementById('stat-streak').style.display = 'inline-flex';
+        document.getElementById('streak-numero').textContent = streak;
+      }
+    }
+
+    async function carregarContadorAlunos(){
+      const { count } = await supabaseClient
+        .from('profiles').select('*', { count: 'exact', head: true }).eq('approved', true);
+
+      if(count && count > 0){
+        document.getElementById('stat-alunos').style.display = 'inline-flex';
+        document.getElementById('alunos-numero').textContent = count;
+      }
+    }
+
+    function buscarAulas(termo){
+      const resultados = document.getElementById('busca-resultados');
+      if(!termo || termo.trim().length < 2){
+        resultados.classList.remove('open');
+        resultados.innerHTML = '';
+        return;
+      }
+      const termoLower = termo.toLowerCase();
+      const encontradas = cacheAulas.filter(a => a.titulo.toLowerCase().includes(termoLower)).slice(0, 8);
+
+      if(encontradas.length === 0){
+        resultados.innerHTML = '<div class="busca-item-vazio">Nenhuma aula encontrada.</div>';
+      } else {
+        resultados.innerHTML = encontradas.map(a =>
+          `<a class="busca-item" href="aula.html?id=${a.id}">${a.titulo}</a>`
+        ).join('');
+      }
+      resultados.classList.add('open');
+    }
+
+    document.addEventListener('click', function(e){
+      if(!e.target.closest('.busca-wrap')){
+        document.getElementById('busca-resultados').classList.remove('open');
+      }
+      if(!e.target.closest('.perfil-chip-wrap')){
+        document.getElementById('perfil-dropdown').classList.remove('open');
+      }
+      if(!e.target.closest('.nav-menu-wrap')){
+        document.getElementById('nav-dropdown').classList.remove('open');
+      }
+    });
 
     async function sair(){
       await supabaseClient.auth.signOut();

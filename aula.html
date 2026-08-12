@@ -8,9 +8,21 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body oncontextmenu="return false;">
+  <div class="app-loader" id="app-loader">
+    <div class="loader-logo">🏗️</div>
+    <div class="loader-text">O ARQUITETO</div>
+    <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+  </div>
+
   <div class="topbar">
     <div class="eyebrow">Planta Mestra</div>
-    <a class="logout" href="#" onclick="sair()">Sair</a>
+    <div class="perfil-chip-wrap">
+      <button class="perfil-chip" onclick="togglePerfilMenu()" id="perfil-chip">?</button>
+      <div class="perfil-dropdown" id="perfil-dropdown">
+        <div class="perfil-dropdown-nome" id="perfil-dropdown-nome">—</div>
+        <a href="#" onclick="sair()">Sair</a>
+      </div>
+    </div>
   </div>
 
   <div class="aula-wrap">
@@ -96,6 +108,29 @@
       }
     }
 
+    function togglePerfilMenu(){
+      document.getElementById('perfil-dropdown').classList.toggle('open');
+    }
+
+    function preencherChipPerfil(profile){
+      document.getElementById('perfil-chip').textContent = (profile.nome || '?').charAt(0).toUpperCase();
+      document.getElementById('perfil-dropdown-nome').textContent = profile.nome || profile.email;
+    }
+
+    document.addEventListener('click', function(e){
+      if(!e.target.closest('.perfil-chip-wrap')){
+        const d = document.getElementById('perfil-dropdown');
+        if(d) d.classList.remove('open');
+      }
+    });
+
+    function esconderLoader(){
+      const loader = document.getElementById('app-loader');
+      if(!loader) return;
+      loader.classList.add('fade-out');
+      setTimeout(() => loader.remove(), 400);
+    }
+
     function getParam(nome){
       return new URLSearchParams(window.location.search).get(nome);
     }
@@ -119,6 +154,7 @@
       const profile = await checarAcesso();
       if(!profile) return;
       currentUserId = profile.id;
+      preencherChipPerfil(profile);
 
       const aulaId = getParam('id');
       if(!aulaId){ window.location.href = 'membros.html'; return; }
@@ -132,12 +168,17 @@
       document.getElementById('modulo-nome').textContent = modulo ? modulo.titulo : '';
       document.getElementById('aula-nome').textContent = aula.titulo;
       renderizarPdf(aula.url);
+      esconderLoader();
       carregarNotas();
 
       // registra essa aula como "último acesso" (pro botão continuar na dashboard)
       supabaseClient.from('ultimo_acesso').upsert({
         user_id: currentUserId, aula_id: aulaId, atualizado_em: new Date().toISOString()
       }).then(() => {});
+
+      // registra o dia de hoje como "dia ativo" (pro streak)
+      const hoje = new Date().toISOString().split('T')[0];
+      supabaseClient.from('atividade_diaria').insert({ user_id: currentUserId, dia: hoje }).then(() => {});
 
       // checa se já está marcada como concluída
       const { data: prog } = await supabaseClient
@@ -172,9 +213,30 @@
       } else {
         await supabaseClient.from('progresso').insert({ user_id: currentUserId, aula_id: currentAulaId });
         concluida = true;
+        celebrar();
       }
       btn.disabled = false;
       atualizarBotaoConcluir();
+    }
+
+    function celebrar(){
+      const cores = ['#D97706', '#f0a83a', '#ffffff'];
+      for(let i = 0; i < 24; i++){
+        const conf = document.createElement('div');
+        conf.className = 'confete';
+        conf.style.left = (45 + Math.random() * 10) + 'vw';
+        conf.style.background = cores[Math.floor(Math.random() * cores.length)];
+        conf.style.animationDelay = (Math.random() * 0.3) + 's';
+        conf.style.setProperty('--dx', (Math.random() * 200 - 100) + 'px');
+        document.body.appendChild(conf);
+        setTimeout(() => conf.remove(), 1600);
+      }
+      const toast = document.createElement('div');
+      toast.className = 'toast-salvo show';
+      toast.textContent = '🎉 Aula concluída! Mandando bem.';
+      toast.style.background = 'var(--accent)';
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.style.bottom = '-60px'; setTimeout(() => toast.remove(), 400); }, 2200);
     }
 
     function atualizarBotaoConcluir(){

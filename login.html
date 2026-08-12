@@ -20,7 +20,7 @@
         <input id="senha" type="password" placeholder="Sua senha">
         <button type="button" class="btn-mostrar-senha" onclick="alternarSenha()" id="btn-olho">👁️</button>
       </div>
-      <button onclick="entrar()">Entrar</button>
+      <button id="btn-entrar" onclick="entrar()">Entrar</button>
       <div id="msg" class="msg"></div>
     </div>
     <div class="foot-link">Ainda não tem acesso? <a href="cadastro.html">Solicitar acesso</a></div>
@@ -45,6 +45,16 @@
       const email = document.getElementById('email').value.trim();
       const senha = document.getElementById('senha').value;
       const msg = document.getElementById('msg');
+      const btn = document.getElementById('btn-entrar');
+
+      if(!email || !senha){
+        showMsg('Preencha e-mail e senha.', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Entrando...';
+      msg.className = 'msg';
 
       const { data, error } = await supabaseClient.auth.signInWithPassword({
         email: email, password: senha
@@ -52,6 +62,8 @@
 
       if(error){
         showMsg('E-mail ou senha inválidos.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
         return;
       }
 
@@ -64,8 +76,12 @@
 
       if(!profile){
         showMsg('Perfil não encontrado. Contate o suporte.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
         return;
       }
+
+      btn.textContent = 'Tudo certo, entrando...';
 
       if(profile.is_admin){
         window.location.href = 'admin.html';
