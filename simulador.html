@@ -257,15 +257,20 @@
       setTimeout(() => toast.classList.remove('show'), 2500);
     }
 
-    function carregarSalvo(){
+    function carregarSalvo(nichoRecomendado){
       try{
         const salvo = localStorage.getItem('simulador-perfil');
-        if(!salvo) return;
+        if(!salvo){
+          if(nichoRecomendado){
+            document.getElementById('sim-nicho').value = nichoRecomendado;
+          }
+          return;
+        }
         const dados = JSON.parse(salvo);
         document.getElementById('sim-nome').value = dados.nome || '';
         document.getElementById('sim-usuario').value = dados.usuario || '';
         document.getElementById('sim-bio').value = dados.bio || '';
-        document.getElementById('sim-nicho').value = dados.nicho || '';
+        document.getElementById('sim-nicho').value = dados.nicho || nichoRecomendado || '';
         document.getElementById('sim-posts').value = dados.posts || '27';
         document.getElementById('sim-seguidores').value = dados.seguidores || '1.204';
         document.getElementById('sim-seguindo').value = dados.seguindo || '89';
@@ -308,7 +313,7 @@
       const profile = await checarAcesso();
       if(profile){
         preencherChipPerfil(profile);
-        carregarSalvo();
+        carregarSalvo(profile.nicho_recomendado);
         if(profile.is_admin){
           const dropdown = document.getElementById('nav-dropdown');
           if(dropdown && !dropdown.querySelector('a[href="admin.html"]')){

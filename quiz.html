@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Descobridor de Nicho</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://drlmrqgqauzbrderovik.supabase.co">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-loader" id="app-loader">
+    <div class="loader-logo">🏗️</div>
+    <div class="loader-text">O ARQUITETO</div>
+    <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+  </div>
+
+  <div class="topbar">
+    <div class="nav-menu-wrap">
+      <button class="nav-menu-trigger" onclick="toggleMenu()">Descobridor de Nicho ▾</button>
+      <div class="nav-menu-dropdown" id="nav-dropdown">
+        <a class="nav-menu-item" href="membros.html">Área de Membros</a>
+        <a class="nav-menu-item" href="simulador.html">Simulador de Perfil</a>
+        <a class="nav-menu-item current" href="quiz.html">Descobridor de Nicho</a>
+      </div>
+    </div>
+    <div class="perfil-chip-wrap">
+      <button class="perfil-chip" onclick="togglePerfilMenu()" id="perfil-chip">?</button>
+      <div class="perfil-dropdown" id="perfil-dropdown">
+        <div class="perfil-dropdown-nome" id="perfil-dropdown-nome">—</div>
+        <a href="#" onclick="sair()">Sair</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="aula-wrap" style="max-width:520px;">
+    <div class="aula-eyebrow">Ferramenta</div>
+    <h1 class="aula-titulo" style="font-size:22px;">Descobridor de Nicho</h1>
+    <p style="color:var(--muted); font-size:13px; margin-bottom:28px;">
+      Responda 5 perguntas rápidas e descubra qual nicho combina mais com você antes de construir seu perfil.
+    </p>
+
+    <div class="quiz-progress" id="quiz-progress">
+      <div class="quiz-progress-fill" id="quiz-progress-fill"></div>
+    </div>
+
+    <div class="quiz-card" id="quiz-card">
+      <div class="quiz-numero" id="quiz-numero">Pergunta 1 de 5</div>
+      <div class="quiz-pergunta" id="quiz-pergunta">Carregando...</div>
+      <div class="quiz-opcoes" id="quiz-opcoes"></div>
+    </div>
+
+    <div class="quiz-resultado" id="quiz-resultado" style="display:none;">
+      <div class="quiz-resultado-eyebrow">Seu nicho recomendado</div>
+      <div class="quiz-resultado-nome" id="resultado-nome">—</div>
+      <p class="quiz-resultado-desc" id="resultado-desc"></p>
+
+      <div class="quiz-resultado-bloco">
+        <div class="quiz-resultado-titulo">Tom de voz recomendado</div>
+        <p id="resultado-tom" class="quiz-resultado-texto"></p>
+      </div>
+
+      <div class="quiz-resultado-bloco">
+        <div class="quiz-resultado-titulo">Dicas de bio</div>
+        <ul id="resultado-dicas" class="quiz-resultado-lista"></ul>
+      </div>
+
+      <a href="simulador.html" class="btn" style="display:block; text-align:center; text-decoration:none; margin-top:10px;">Ir montar meu perfil →</a>
+      <button class="btn-ghost" onclick="refazerQuiz()" style="margin-top:12px;">Refazer o quiz</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    const perguntas = [
+      {
+        texto: "Quando alguém pensa em você, o que vem à cabeça primeiro?",
+        opcoes: [
+          { texto: "Alguém que sempre supera obstáculos", tags: ["motivacional"] },
+          { texto: "Alguém que entende de dinheiro e estratégia", tags: ["dinheiro"] },
+          { texto: "Alguém intenso e misterioso", tags: ["dark_romance", "espiritual"] },
+          { texto: "Alguém disciplinado e focado no corpo/mente", tags: ["disciplina"] },
+          { texto: "Alguém cheio de curiosidades e teorias", tags: ["curiosidades"] }
+        ]
+      },
+      {
+        texto: "O que você mais para pra assistir no Instagram hoje?",
+        opcoes: [
+          { texto: "Histórias de superação e virada de jogo", tags: ["motivacional"] },
+          { texto: "Conteúdo sobre negócios, tráfego e vendas", tags: ["dinheiro"] },
+          { texto: "Reflexões profundas sobre relações e sentimentos", tags: ["dark_romance"] },
+          { texto: "Rotina, treino e disciplina de outras pessoas", tags: ["disciplina"] },
+          { texto: "Fatos obscuros, teorias e curiosidades", tags: ["curiosidades", "espiritual"] }
+        ]
+      },
+      {
+        texto: "Se você pudesse ensinar uma coisa pra alguém agora, qual seria?",
+        opcoes: [
+          { texto: "Como não desistir mesmo quando dói", tags: ["motivacional"] },
+          { texto: "Como ganhar dinheiro pela internet", tags: ["dinheiro"] },
+          { texto: "Como entender os próprios sentimentos", tags: ["dark_romance", "espiritual"] },
+          { texto: "Como ter disciplina de verdade", tags: ["disciplina"] },
+          { texto: "Algo que a maioria das pessoas não sabe", tags: ["curiosidades"] }
+        ]
+      },
+      {
+        texto: "Qual dessas frases mais se parece com você?",
+        opcoes: [
+          { texto: "\"Eu já passei por muita coisa e vim mais forte\"", tags: ["motivacional"] },
+          { texto: "\"Eu penso em oportunidade o tempo todo\"", tags: ["dinheiro"] },
+          { texto: "\"Eu sinto tudo muito intensamente\"", tags: ["dark_romance"] },
+          { texto: "\"Eu sou movido a rotina e consistência\"", tags: ["disciplina"] },
+          { texto: "\"Eu adoro entender como as coisas funcionam por trás\"", tags: ["curiosidades", "espiritual"] }
+        ]
+      },
+      {
+        texto: "Qual reação você mais quer causar em quem vê seu perfil?",
+        opcoes: [
+          { texto: "Inspiração pra não desistir", tags: ["motivacional"] },
+          { texto: "Vontade de aprender a ganhar dinheiro", tags: ["dinheiro"] },
+          { texto: "Uma conexão emocional profunda", tags: ["dark_romance"] },
+          { texto: "Respeito pela disciplina e consistência", tags: ["disciplina"] },
+          { texto: "Curiosidade genuína, \"preciso saber mais\"", tags: ["curiosidades", "espiritual"] }
+        ]
+      }
+    ];
+
+    const resultados = {
+      motivacional: {
+        nome: "Motivacional & Superação",
+        desc: "Seu forte é inspirar quem está passando por dificuldade. Perfis desse nicho crescem contando histórias reais de virada de jogo e força mental.",
+        tom: "Direto, cru e cheio de emoção. Fale como alguém que já esteve no fundo do poço e sabe exatamente como é.",
+        dicas: [
+          "Use frases curtas e de impacto na bio, tipo declaração",
+          "Deixe claro qual foi sua virada de chave em uma linha",
+          "Evite clichê genérico — seja específico sobre sua história"
+        ]
+      },
+      dinheiro: {
+        nome: "Dinheiro & Alta Performance",
+        desc: "Você tem facilidade pra falar de estratégia, resultado e mentalidade de crescimento. Esse nicho atrai quem quer prosperar financeiramente.",
+        tom: "Confiante, direto ao ponto, sem enrolação. Fale como alguém que já testou e validou o que ensina.",
+        dicas: [
+          "Coloque um resultado ou número na bio, se tiver",
+          "Use palavras como 'estratégia', 'sistema', 'método'",
+          "Deixe claro o que a pessoa ganha ao te seguir"
+        ]
+      },
+      dark_romance: {
+        nome: "Relacionamentos & Dark Romance",
+        desc: "Você conecta pelas emoções — intensidade, desejo, vínculo. Esse nicho prende pela identificação emocional profunda.",
+        tom: "Poético, intenso, um pouco misterioso. Frases que fazem a pessoa sentir antes de entender.",
+        dicas: [
+          "Use reticências e frases incompletas de propósito",
+          "Fale em primeira pessoa, como um desabafo",
+          "Menos é mais — não explique demais na bio"
+        ]
+      },
+      disciplina: {
+        nome: "Disciplina & Fitness Mental",
+        desc: "Seu diferencial é a consistência. Esse nicho atrai quem busca rotina, foco e resultado através da disciplina diária.",
+        tom: "Sério, técnico, sem desculpa. Fale como quem cobra excelência de si mesmo todos os dias.",
+        dicas: [
+          "Cite sua rotina ou hábito mais forte na bio",
+          "Use verbos de ação: 'construa', 'domine', 'execute'",
+          "Evite emoji fofo — a estética aqui é mais séria/minimalista"
+        ]
+      },
+      curiosidades: {
+        nome: "Curiosidades & Fatos Obscuros",
+        desc: "Você prende atenção com informação inesperada. Esse nicho cresce rápido porque as pessoas compartilham muito esse tipo de conteúdo.",
+        tom: "Instigante, quase um convite a descobrir algo escondido. Sempre deixe uma pergunta no ar.",
+        dicas: [
+          "Use a bio pra prometer 'o que ninguém te conta'",
+          "Números e listas funcionam bem ('3 fatos que...')",
+          "Mantenha um tom de segredo revelado"
+        ]
+      },
+      espiritual: {
+        nome: "Espiritualidade & Mistério",
+        desc: "Você tem uma conexão natural com o que é mais profundo e simbólico. Esse nicho atrai quem busca sentido além do óbvio.",
+        tom: "Calmo, reflexivo, quase filosófico. Frases que fazem o leitor parar pra pensar.",
+        dicas: [
+          "Use símbolos (🜂 🕯️ 🌑) com moderação na bio",
+          "Fale em metáforas ao invés de frases literais",
+          "Menos venda, mais presença — deixe o mistério trabalhar"
+        ]
+      }
+    };
+
+    let respostasAtuais = 0;
+    let scores = {};
+    let currentProfile = null;
+
+    function toggleMenu(){
+      document.getElementById('nav-dropdown').classList.toggle('open');
+    }
+    function togglePerfilMenu(){
+      document.getElementById('perfil-dropdown').classList.toggle('open');
+    }
+    function preencherChipPerfil(profile){
+      document.getElementById('perfil-chip').textContent = (profile.nome || '?').charAt(0).toUpperCase();
+      document.getElementById('perfil-dropdown-nome').textContent = profile.nome || profile.email;
+    }
+    document.addEventListener('click', function(e){
+      if(!e.target.closest('.perfil-chip-wrap')){
+        document.getElementById('perfil-dropdown').classList.remove('open');
+      }
+      if(!e.target.closest('.nav-menu-wrap')){
+        document.getElementById('nav-dropdown').classList.remove('open');
+      }
+    });
+
+    async function checarAcesso(){
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if(!session){ window.location.href = 'login.html'; return null; }
+      const user = session.user;
+      const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
+      if(!profile || (!profile.approved && !profile.is_admin)){
+        window.location.href = 'pendente.html'; return null;
+      }
+      return profile;
+    }
+
+    function esconderLoader(){
+      const loader = document.getElementById('app-loader');
+      loader.classList.add('fade-out');
+      setTimeout(() => loader.remove(), 400);
+    }
+
+    function renderizarPergunta(){
+      const p = perguntas[respostasAtuais];
+      document.getElementById('quiz-numero').textContent = `Pergunta ${respostasAtuais + 1} de ${perguntas.length}`;
+      document.getElementById('quiz-pergunta').textContent = p.texto;
+      document.getElementById('quiz-opcoes').innerHTML = p.opcoes.map((op, i) =>
+        `<button class="quiz-opcao" onclick="responder(${i})">${op.texto}</button>`
+      ).join('');
+
+      const progresso = (respostasAtuais / perguntas.length) * 100;
+      document.getElementById('quiz-progress-fill').style.width = progresso + '%';
+    }
+
+    function responder(indiceOpcao){
+      const opcao = perguntas[respostasAtuais].opcoes[indiceOpcao];
+      opcao.tags.forEach(tag => {
+        scores[tag] = (scores[tag] || 0) + 1;
+      });
+
+      respostasAtuais++;
+      if(respostasAtuais < perguntas.length){
+        renderizarPergunta();
+      } else {
+        mostrarResultado();
+      }
+    }
+
+    function mostrarResultado(){
+      document.getElementById('quiz-progress-fill').style.width = '100%';
+      document.getElementById('quiz-card').style.display = 'none';
+
+      let melhorTag = null;
+      let melhorScore = -1;
+      Object.keys(scores).forEach(tag => {
+        if(scores[tag] > melhorScore){
+          melhorScore = scores[tag];
+          melhorTag = tag;
+        }
+      });
+
+      const r = resultados[melhorTag];
+      document.getElementById('resultado-nome').textContent = r.nome;
+      document.getElementById('resultado-desc').textContent = r.desc;
+      document.getElementById('resultado-tom').textContent = r.tom;
+      document.getElementById('resultado-dicas').innerHTML = r.dicas.map(d => `<li>${d}</li>`).join('');
+      document.getElementById('quiz-resultado').style.display = 'block';
+
+      if(currentProfile){
+        supabaseClient.from('profiles').update({ nicho_recomendado: r.nome }).eq('id', currentProfile.id).then(() => {});
+      }
+    }
+
+    function refazerQuiz(){
+      respostasAtuais = 0;
+      scores = {};
+      document.getElementById('quiz-resultado').style.display = 'none';
+      document.getElementById('quiz-card').style.display = 'block';
+      renderizarPergunta();
+    }
+
+    async function sair(){
+      await supabaseClient.auth.signOut();
+      window.location.href = 'login.html';
+    }
+
+    (async () => {
+      const profile = await checarAcesso();
+      if(!profile) return;
+      currentProfile = profile;
+      preencherChipPerfil(profile);
+      if(profile.is_admin){
+        const dropdown = document.getElementById('nav-dropdown');
+        const item = document.createElement('a');
+        item.className = 'nav-menu-item nav-menu-item-master';
+        item.href = 'admin.html';
+        item.textContent = 'Painel Master';
+        dropdown.appendChild(item);
+      }
+      renderizarPergunta();
+      esconderLoader();
+    })();
+  </script>
+</body>
+</html>
