@@ -34,17 +34,10 @@
 
   <div class="dash-header">
     <h1 class="dash-titulo">Planta Mestra</h1>
-    <p class="dash-sub">Selecione um módulo para continuar a construção</p>
-
-    <div class="dash-stats-row">
-      <div class="mini-stat" id="stat-streak" style="display:none;">🔥 <span id="streak-numero">0</span> dias seguidos</div>
-      <div class="mini-stat" id="stat-alunos" style="display:none;">👥 <span id="alunos-numero">0</span> construtores ativos</div>
-    </div>
-
-    <div class="busca-wrap">
-      <input type="text" id="busca-input" placeholder="Buscar uma aula pelo nome..." oninput="buscarAulas(this.value)">
-      <div class="busca-resultados" id="busca-resultados"></div>
-    </div>
+    <p class="dash-sub">
+      Selecione um módulo para continuar a construção
+      <span id="stat-streak" class="streak-inline" style="display:none;">· 🔥 <span id="streak-numero">0</span> dias seguidos</span>
+    </p>
 
     <div id="continuar-banner"></div>
 
@@ -59,9 +52,19 @@
     </div>
   </div>
 
+  <div class="modules-section-head">
+    <span class="modules-section-titulo">Módulos</span>
+    <div class="busca-wrap">
+      <input type="text" id="busca-input" placeholder="Buscar aula..." oninput="buscarAulas(this.value)">
+      <div class="busca-resultados" id="busca-resultados"></div>
+    </div>
+  </div>
+
   <div class="modules-grid" id="modules">
     <p style="color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:13px; padding: 0 40px;">Carregando módulos...</p>
   </div>
+
+  <div class="alunos-ativos-fixed" id="stat-alunos" style="display:none;">👥 <span id="alunos-numero">0</span> construtores ativos</div>
 
   <div class="depoimentos-wrap">
     <h3 class="depoimentos-titulo">Quem já está construindo</h3>

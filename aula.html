@@ -37,6 +37,8 @@
       </div>
     </div>
 
+    <div id="link-extra-wrap"></div>
+
     <div class="aula-marcar-wrap">
       <button id="btn-concluir" class="btn-concluir" onclick="alternarConcluida()">✓ Marcar como concluída</button>
     </div>
@@ -167,6 +169,13 @@
 
       document.getElementById('modulo-nome').textContent = modulo ? modulo.titulo : '';
       document.getElementById('aula-nome').textContent = aula.titulo;
+
+      if(aula.link_extra){
+        document.getElementById('link-extra-wrap').innerHTML = `
+          <a href="${aula.link_extra}" target="_blank" rel="noopener" class="btn-link-extra">
+            ${aula.link_extra_texto || 'Saiba mais →'}
+          </a>`;
+      }
       renderizarPdf(aula.url);
       esconderLoader();
       carregarNotas();

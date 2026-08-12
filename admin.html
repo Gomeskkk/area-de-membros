@@ -46,6 +46,22 @@
       <div id="msg-pdf" class="msg"></div>
     </div>
 
+    <div class="admin-section">
+      <h3 style="margin-bottom:14px;">Botão extra numa aula (opcional)</h3>
+      <p style="color:var(--muted); font-size:12px; margin-bottom:14px;">
+        Use isso quando quiser um botão clicável embaixo do PDF de uma aula específica — por exemplo, um link de upsell ou próximo passo.
+      </p>
+      <label class="mini-input">Aula</label>
+      <select id="select-aula-link" style="width:100%; background:var(--bg); color:var(--text); border:1px solid var(--border); padding:12px; border-radius:3px;"></select>
+      <label class="mini-input">Texto do botão</label>
+      <input id="link-extra-texto" type="text" placeholder="Ex: Quero o próximo nível 🚀">
+      <label class="mini-input">Link do botão</label>
+      <input id="link-extra-url" type="text" placeholder="Cole aqui o link (ex: sua página de vendas)">
+      <button onclick="salvarLinkExtra()">Salvar botão</button>
+      <button class="btn-ghost" onclick="removerLinkExtra()" style="margin-top:10px;">Remover botão desta aula</button>
+      <div id="msg-link-extra" class="msg"></div>
+    </div>
+
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -151,6 +167,54 @@
       document.getElementById('pdf-titulo').value = '';
       document.getElementById('pdf-url').value = '';
       msg.textContent = 'Aula adicionada!'; msg.className='msg show ok';
+      carregarSelectAulas();
+    }
+
+    async function carregarSelectAulas(){
+      const { data: modulos } = await supabaseClient.from('modules').select('*').order('ordem');
+      const { data: aulas } = await supabaseClient.from('pdfs').select('*').order('ordem');
+
+      const modulosPorId = {};
+      (modulos || []).forEach(m => modulosPorId[m.id] = m.titulo);
+
+      const select = document.getElementById('select-aula-link');
+      select.innerHTML = (aulas || [])
+        .map(a => `<option value="${a.id}">${modulosPorId[a.module_id] || ''} — ${a.titulo}</option>`).join('');
+
+      if(aulas && aulas.length){
+        select.onchange = () => preencherCamposLinkExtra(select.value, aulas);
+        preencherCamposLinkExtra(select.value, aulas);
+      }
+    }
+
+    function preencherCamposLinkExtra(aulaId, aulas){
+      const aula = aulas.find(a => a.id === aulaId);
+      document.getElementById('link-extra-texto').value = (aula && aula.link_extra_texto) || '';
+      document.getElementById('link-extra-url').value = (aula && aula.link_extra) || '';
+    }
+
+    async function salvarLinkExtra(){
+      const aulaId = document.getElementById('select-aula-link').value;
+      const texto = document.getElementById('link-extra-texto').value.trim();
+      const url = document.getElementById('link-extra-url').value.trim();
+      const msg = document.getElementById('msg-link-extra');
+
+      if(!aulaId){ msg.textContent = 'Escolha uma aula.'; msg.className = 'msg show error'; return; }
+      if(!texto || !url){ msg.textContent = 'Preencha o texto e o link do botão.'; msg.className = 'msg show error'; return; }
+
+      await supabaseClient.from('pdfs').update({ link_extra: url, link_extra_texto: texto }).eq('id', aulaId);
+      msg.textContent = 'Botão salvo!'; msg.className = 'msg show ok';
+    }
+
+    async function removerLinkExtra(){
+      const aulaId = document.getElementById('select-aula-link').value;
+      const msg = document.getElementById('msg-link-extra');
+      if(!aulaId) return;
+
+      await supabaseClient.from('pdfs').update({ link_extra: null, link_extra_texto: null }).eq('id', aulaId);
+      document.getElementById('link-extra-texto').value = '';
+      document.getElementById('link-extra-url').value = '';
+      msg.textContent = 'Botão removido desta aula.'; msg.className = 'msg show ok';
     }
 
     async function sair(){
@@ -160,7 +224,7 @@
 
     (async () => {
       const ok = await checarAdmin();
-      if(ok){ carregarUsuarios(); carregarModulos(); }
+      if(ok){ carregarUsuarios(); carregarModulos(); carregarSelectAulas(); }
     })();
   </script>
 </body>
